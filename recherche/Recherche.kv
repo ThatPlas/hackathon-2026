@@ -1,0 +1,208 @@
+<RechercheContent@MDScreen>:
+    ScreenManager:
+        id: search_screen_manager
+        
+        # --- ECRAN 1 : LISTE DES SERVICES ---
+        Screen:
+            name: 'liste_recherche'
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(10), 0, 0]
+                
+                MDFloatLayout:
+                    size_hint_y: None
+                    height: dp(60)
+                    Image:
+                        source: '../logo.png' # Chemin corrigé
+                        size_hint: None, None
+                        size: dp(150), dp(60)
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    MDIconButton:
+                        icon: "cart"
+                        theme_text_color: "Custom"
+                        text_color: "#691C32"
+                        pos_hint: {'right': 0.98, 'center_y': 0.5}
+                        on_release: app.ouvrir_panier()
+
+                MDBoxLayout:
+                    adaptive_height: True
+                    padding: [dp(20), dp(10), dp(20), dp(10)]
+                    MDTextField:
+                        id: search_field
+                        hint_text: "Rechercher une prestation"
+                        mode: "round"
+                        on_text: app.filter_services(self.text)
+                
+                MDScrollView:
+                    MDBoxLayout:
+                        id: container_prestations
+                        orientation: 'vertical'
+                        adaptive_height: True
+                        padding: dp(20)
+                        spacing: dp(15)
+
+        # --- ECRAN 2 : DETAIL D'UNE PRESTATION ---
+        Screen:
+            name: 'details_presta'
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: [dp(20), dp(10), dp(20), dp(20)]
+                spacing: dp(15)
+                
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: dp(55) 
+                    MDIconButton:
+                        icon: "arrow-left"
+                        on_release: 
+                            search_screen_manager.transition.direction = "right"
+                            search_screen_manager.current = 'liste_recherche'
+                    
+                    Image:
+                        source: '../logo.png' # Chemin corrigé
+                        size_hint: None, None
+                        size: dp(120), dp(40)
+                        pos_hint: {'center_y': 0.5}
+
+                    Widget:
+
+                MDLabel:
+                    id: detail_titre
+                    text: ""
+                    font_style: "H4"
+                    bold: True
+                    adaptive_height: True
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "#691C32"
+                
+                MDScrollView:
+                    MDLabel:
+                        id: detail_desc
+                        text: ""
+                        font_style: "Body1"
+                        adaptive_height: True
+                        halign: "justify"
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: dp(15)
+                    
+                    MDBoxLayout:
+                        spacing: dp(10)
+                        adaptive_height: True
+                        MDTextField:
+                            id: input_date
+                            hint_text: "Date (JJ/MM/AAAA)"
+                        
+                        MDTextField:
+                            id: input_hour
+                            hint_text: "Heure (8-16)"
+
+                    MDLabel:
+                        id: detail_prix
+                        text: "Prix : 0.00 €"
+                        font_style: "H6"
+                        bold: True
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: "#691C32"
+                        adaptive_height: True
+
+                    MDFillRoundFlatButton:
+                        text: "AJOUTER À MA PRESTATION"
+                        pos_hint: {"center_x": .5}
+                        md_bg_color: "#691C32"
+                        size_hint_x: 1
+                        radius: [dp(20), dp(20), dp(20), dp(20)] 
+                        on_release: app.ajouter_prestation()
+
+        # --- ECRAN 3 : LE PANIER ---
+        Screen:
+            name: 'page_panier'
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: dp(20)
+                spacing: dp(15)
+                
+                MDBoxLayout:
+                    adaptive_height: True
+                    MDIconButton:
+                        icon: "arrow-left"
+                        on_release: 
+                            search_screen_manager.transition.direction = "right"
+                            search_screen_manager.current = 'liste_recherche'
+                    MDLabel:
+                        text: "Mon Panier"
+                        font_style: "H5"
+                        bold: True
+                
+                MDScrollView:
+                    MDList:
+                        id: panier_list
+                
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    adaptive_height: True
+                    padding: [0, dp(10)]
+                    MDLabel:
+                        text: "TOTAL :"
+                        bold: True
+                        font_style: "H6"
+                    MDLabel:
+                        id: total_label
+                        text: "0.00 €"
+                        halign: "right"
+                        bold: True
+                        font_style: "H6"
+                        theme_text_color: "Custom"
+                        text_color: "#691C32"
+                
+                MDFillRoundFlatButton:
+                    text: "RESERVER"
+                    pos_hint: {"center_x": .5}
+                    md_bg_color: "#691C32"
+                    size_hint_x: 1
+                    radius: [dp(20), dp(20), dp(20), dp(20)] 
+                    on_release: app.payer_commande()
+
+<ServiceCard>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: header.height + sub_services_list.height
+    elevation: 2
+    radius: [dp(15),]
+    md_bg_color: 1, 1, 1, 1
+    on_release: root.toggle_expansion()
+    
+    MDBoxLayout:
+        id: header
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(200)
+        FitImage:
+            source: root.image_source
+            size_hint_y: None
+            height: dp(140)
+            radius: [dp(15), dp(15), 0, 0]
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: [dp(15), dp(10), dp(15), 0]
+            MDLabel:
+                text: root.title_text
+                font_style: 'Subtitle1'
+                bold: True
+                adaptive_height: True
+            MDLabel:
+                text: "Cliquez pour voir les services"
+                font_style: 'Caption'
+                theme_text_color: 'Secondary'
+                adaptive_height: True
+    
+    MDList:
+        id: sub_services_list
+        size_hint_y: None
+        height: 0
+        opacity: 0
+        adaptive_height: True

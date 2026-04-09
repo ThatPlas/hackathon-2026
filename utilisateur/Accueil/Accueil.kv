@@ -1,4 +1,5 @@
 #:include utilisateur/profil/profil.kv
+#:include recherche/Recherche.kv
 
 MDScreen:
     name: "espace_client"
@@ -16,35 +17,11 @@ MDScreen:
             text: 'Rechercher'
             icon: 'magnify'
             
-            MDBoxLayout:
-                orientation: 'vertical'
-                padding: [0, dp(10), 0, 0]
-                
-                Image:
-                    source: '../logo.png' 
-                    size_hint_y: None
-                    height: dp(60)
-                    pos_hint: {'center_x': 0.5}
-
-                MDBoxLayout:
-                    adaptive_height: True
-                    padding: [dp(20), dp(10), dp(20), dp(10)]
-                    MDTextField:
-                        id: search_field
-                        hint_text: "Rechercher une prestation (ex: Maintenance)"
-                        mode: "round"
-                        on_text: app.filter_services(self.text)
-
-                MDScrollView:
-                    MDBoxLayout:
-                        id: container_prestations
-                        orientation: 'vertical'
-                        adaptive_height: True
-                        padding: dp(20)
-                        spacing: dp(15)
+            RechercheContent:
+                id: contenu_recherche
 
         # ==========================================
-        # --- ONGLET 2 : ACCUEIL (Nouveau Design !) ---
+        # --- ONGLET 2 : ACCUEIL ---
         # ==========================================
         MDBottomNavigationItem:
             name: 'page_accueil'
@@ -62,7 +39,7 @@ MDScreen:
                         spacing: dp(20)
 
                         Image:
-                            source: '../logo.png'
+                            source: '../../logo.png'
                             size_hint_y: None
                             height: dp(120)
                             allow_stretch: True
@@ -199,7 +176,7 @@ MDScreen:
                             line_height: 1.2
 
                         FitImage:
-                            source: '../images/accueil/famille.jpg'
+                            source: '../../images/accueil/famille.jpg'
                             size_hint_y: None
                             height: dp(220)
                             radius: [dp(8), dp(8), dp(8), dp(8)]
@@ -220,7 +197,7 @@ MDScreen:
                             line_height: 1.2
 
                         FitImage:
-                            source: '../images/accueil/grandplace.jpg'
+                            source: '../../images/accueil/grandplace.jpg'
                             size_hint_y: None
                             height: dp(220)
                             radius: [dp(8), dp(8), dp(8), dp(8)]
@@ -233,7 +210,7 @@ MDScreen:
                             line_height: 1.2
                             
                         FitImage:
-                            source: '../images/accueil/endroit.png'
+                            source: '../../images/accueil/endroit.png'
                             size_hint_y: None
                             height: dp(220)
                             radius: [dp(8), dp(8), dp(8), dp(8)]
@@ -248,7 +225,7 @@ MDScreen:
                             padding: [dp(24), dp(12), dp(24), dp(12)]
                             radius: [dp(8), dp(8), dp(8), dp(8)]
                             pos_hint: {"center_x": .5}
-                            on_release: nav_bar.switch_tab('page_recherche') # <-- Redirige vers l'onglet recherche !
+                            on_release: nav_bar.switch_tab('page_recherche') 
 
         # ==========================================
         # --- ONGLET 3 : PROFIL ---
@@ -258,36 +235,5 @@ MDScreen:
             text: 'Profil'
             icon: 'account'
             
-            # On insère ici le composant défini dans profil.kv
             ProfilContent:
                 id: contenu_profil
-
-# ==========================================
-# DÉFINITION DES CARTES (Pour l'onglet Recherche)
-# ==========================================
-<ServiceCard>:
-    orientation: 'vertical'
-    size_hint_y: None
-    height: dp(220)
-    elevation: 2
-    radius: [dp(15),]
-    padding: dp(10)
-    md_bg_color: 1, 1, 1, 1
-    
-    FitImage:
-        source: root.image_source
-        size_hint_y: None
-        height: dp(140)
-        radius: [dp(15), dp(15), 0, 0]
-
-    MDBoxLayout:
-        orientation: 'vertical'
-        padding: [dp(5), dp(5), 0, 0]
-        MDLabel:
-            text: root.title_text
-            font_style: 'Subtitle1'
-            bold: True
-        MDLabel:
-            text: root.date_text
-            font_style: 'Caption'
-            theme_text_color: 'Secondary'

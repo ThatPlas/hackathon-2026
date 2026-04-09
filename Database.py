@@ -99,18 +99,42 @@ def update_user_details(user_id, nom, prenom, email, telephone, adresse):
     cursor.close()
     conn.close()
 
+# --- Fonctions pour les Prestations et le Panier ---
+
 def create_prestation(id_user, id_type_presta, debut, fin, adresse):
     conn = get_connection()
     cursor = conn.cursor()
-    
+    # On initialise le statut à 'dans_panier'
     cursor.execute("INSERT INTO prestation (id_user, debut_contrat, fin_contrat, adresse, status) VALUES (%s, %s, %s, %s, %s)",
-                   (id_user, debut, fin, adresse, "En attente"))
-    
+                   (id_user, debut, fin, adresse, "dans_panier"))
     id_presta = cursor.lastrowid
-    
     cursor.execute("INSERT INTO relation_type_presta (id_presta, id_type_presta) VALUES (%s, %s)",
                    (id_presta, id_type_presta))
-    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def get_user_panier(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT tp.nom, tp.prix, p.id_presta 
+        FROM prestation p
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        WHERE p.id_user = %s AND p.status = 'dans_panier'
+    """
+    cursor.execute(query, (user_id,))
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
+def valider_panier_db(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "UPDATE prestation SET status = 'En attente' WHERE id_user = %s AND status = 'dans_panier'"
+    cursor.execute(query, (user_id,))
     conn.commit()
     cursor.close()
     conn.close()
