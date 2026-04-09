@@ -1,34 +1,21 @@
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.card import MDCard
-from kivymd.uix.fitimage import FitImage
-from kivymd.uix.list import ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget
-from kivy.metrics import dp
-from kivymd.uix.pickers import MDDatePicker
-from kivymd.uix.textfield.textfield import MDTextField
-from kivymd.uix.card import MDCard
-from kivy.properties import StringProperty
-from kivymd.uix.fitimage import FitImage
-from datetime import datetime
-from Historique import Historique
-from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.list import OneLineListItem
-from kivy.core.window import Window
+from kivymd.uix.pickers import MDDatePicker
+from datetime import datetime
 import sys
 import os
 
-# Permet à Python de remonter d'un dossier pour trouver "Database.py"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import Database
-class MyApp(MDApp):
 
+class MyApp(MDApp):
     def build(self):
         self.start_date = None
         self.end_date = None
         return Builder.load_file("interface_design.kv")
 
     def show_date_picker(self):
-        from kivymd.uix.pickers import MDDatePicker
         date_dialog = MDDatePicker(mode="range")
         date_dialog.bind(on_save=self.on_save_date)
         date_dialog.open()
@@ -60,45 +47,55 @@ class MyApp(MDApp):
                 item = OneLineListItem(text=f"{p['nom']} ({p['date']})")
                 container.add_widget(item)
 
-    def valider_dates(self):
-        if self.start_date and self.end_date:
-            self.filter_prestations_range(self.start_date, self.end_date)
-            print("Start date : {} | End date : {}".format(self.start_date, self.end_date))
-        else:
-            print("Aucune date sélectionnée !")
+    def remplir_recherche(self, data):
+        """
+        data: liste de dictionnaires avec des infos à afficher
+        Exemple: [{"titre": "Installation", "date": "2026-04-07"}, ...]
+        """
+        container = self.root.ids.container_recherche
+        container.clear_widgets()
+        for item in data:
+            widget = OneLineListItem(text=f"{item['titre']} - {item['date']}")
+            container.add_widget(widget)
 
-    def tenter_inscription(self, nom, prenom, email, mdp):
-        """Fonction déclenchée par le bouton S'inscrire"""
-        label_msg = self.root.ids.message_erreur_insc
-        label_msg.theme_text_color = "Error" # Rouge par défaut
+    def on_start(self):
+    
+        test_data = [
+            {"titre": "Installation", "date": "2026-04-07"},
+            {"titre": "Réparation", "date": "2026-04-08"},
+            {"titre": "Maintenance", "date": "2026-04-09"},
+        ]
+        self.remplir_recherche(test_data)
+
+    def tenter_connexion(self, email, mdp):
+        """Fonction déclenchée par le bouton connexion"""
+        label_msg = self.root.ids.login_msg
         label_msg.text = ""
 
-        # 1. Vérification des champs
-        if not nom or not prenom or not email or not mdp:
+        if not email or not mdp:
             label_msg.text = "Veuillez remplir tous les champs."
             return
 
-        try:
-            # 2. Vérification si l'email existe déjà dans la BDD
-            if Database.user_exists(email):
-                label_msg.text = "Cet email est déjà utilisé."
-                return
-
-            # 3. Création de l'utilisateur
-            succes = Database.create_users(nom, prenom, email, mdp)
-
-            if succes:
-                # Si ça a marché, on affiche le message en vert
-                label_msg.theme_text_color = "Custom"
-                label_msg.text_color = (0, 0.6, 0, 1) # Couleur Verte
-                label_msg.text = "Compte créé avec succès !"
+        if email == "remi" and mdp == "1234":
+            
+            self.root.ids.profil_nom.text = "Remi Kalkan"
+            self.root.ids.profil_email.text = email
+            
+            if hasattr(self.root, "current"):
+                self.root.current = "main_screen"
             else:
-                label_msg.text = "Erreur lors de la création du compte."
+        
+                for child in self.root.children:
+                    if hasattr(child, "current"):
+                        child.current = "main_screen"
+                        break
 
-        except Exception as e:
-            print(f"Erreur BDD : {e}")
-            label_msg.text = "Erreur de connexion au serveur."
+        else:
+            label_msg.text = "Email ou mot de passe incorrect."
 
-    def aller_a_connexion(self):
-        """Action du bouton retour"""
-        # Plus tard, c'est ici que l'on connectera les pages ensemble !
+    def valider_dates(self):
+        if self.start_date and self.end_date:
+            self.filter_prestations_range(self.start_date, self.end_date)
+            print(f"Start date : {self.start_date} | End date : {self.end_date}")
+        else:
+            print("Aucune date sélectionnée !")
