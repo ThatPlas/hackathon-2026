@@ -12,40 +12,47 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-# Imports avec le bon dossier "modification"
+# Importation des modules de logique
 from utilisateur.profil import profil
 from utilisateur.profil.modification import modifier_profil 
 import Database
 
+# Taille d'écran mobile pour le développement
 Window.size = (400, 800)
 
 class ServiceCard(MDCard):
+    """Classe pour les cartes d'aperçu des services"""
     image_source = StringProperty("")
     title_text = StringProperty("")
     date_text = StringProperty("")
 
 class ConciergerieApp(MDApp):
-    utilisateur_courant = None
+    utilisateur_courant = None # Stocke les infos de l'utilisateur connecté
 
     def build(self):
         self.theme_cls.primary_palette = "Red"
         
+        # 1. Charger le gestionnaire d'écrans principal
         sm = Builder.load_file("login.kv")
         
-        # Inscription
+        # 2. Charger et ajouter l'écran d'Inscription
         chemin_insc = os.path.join(ROOT_DIR, 'inscription', 'inscription.kv')
         sm.add_widget(Builder.load_file(chemin_insc))
 
-        # Accueil
+        # 3. Charger et ajouter l'Accueil Client
         chemin_accueil = os.path.join(ROOT_DIR, 'utilisateur', 'Accueil', 'Accueil.kv')
         self.ecran_client = Builder.load_file(chemin_accueil)
         sm.add_widget(self.ecran_client)
 
-        # --- LE CHEMIN CORRIGÉ EST ICI ---
-        # Modifier Profil (Nouvelle Page dans le dossier modification)
+        # 4. Charger la page de Modification de Profil
         chemin_modif = os.path.join(ROOT_DIR, 'utilisateur', 'profil', 'modification', 'modifier_profil.kv')
         self.ecran_modif = Builder.load_file(chemin_modif)
         sm.add_widget(self.ecran_modif)
+
+        # 5. Charger la page de Contact (Correction du chemin vers la racine)
+        chemin_contact = os.path.join(ROOT_DIR, 'contact.kv')
+        self.ecran_contact = Builder.load_file(chemin_contact)
+        sm.add_widget(self.ecran_contact)
         
         return sm
 
@@ -68,27 +75,47 @@ class ConciergerieApp(MDApp):
         self.root.current = "espace_client"
 
     def aller_vers_modifier_profil(self):
+        """Ouvre la page de modification avec les infos pré-remplies"""
         if self.utilisateur_courant:
             self.root.current = "page_modifier_profil"
             modifier_profil.charger_donnees(self.ecran_modif, self.utilisateur_courant)
 
+    def aller_vers_contact(self):
+        """Ouvre la page de contact"""
+        self.root.current = "page_contact"
+
+    # ==========================================
+    # LOGIQUE PROFIL & CONTACT
+    # ==========================================
     def sauvegarder_profil(self):
-        # 1. Récupérer
+        """Enregistre les modifications du profil en BDD"""
         nom = self.ecran_modif.ids.modif_nom.text
         prenom = self.ecran_modif.ids.modif_prenom.text
         email = self.ecran_modif.ids.modif_email.text
         tel = self.ecran_modif.ids.modif_tel.text
         adr = self.ecran_modif.ids.modif_adresse.text
 
-        # 2. Sauvegarder
+        # Mise à jour SQL
         Database.update_user_details(self.utilisateur_courant['id_user'], nom, prenom, email, tel, adr)
 
-        # 3. Rafraîchir
+        # Rafraîchissement des données locales
         self.utilisateur_courant = Database.get_users_details(self.utilisateur_courant['id_user'])
         widget_p = self.ecran_client.ids.contenu_profil
         profil.charger_donnees_profil(widget_p, self.utilisateur_courant)
 
-        # 4. Retour
+        self.retour_profil()
+
+    def envoyer_contact(self, nom, prenom, adresse, ville, email, telephone, message):
+        """Gère l'envoi du formulaire de contact avec tous les champs de votre collègue"""
+        if not nom or not prenom or not email or not message:
+            print("Erreur : Les champs obligatoires ne sont pas remplis.")
+            return
+        
+        # Simulation d'envoi
+        print(f"Demande reçue de {nom} {prenom} de {ville} ({email}) : {message}")
+        
+        # Réinitialisation du champ message et retour au profil
+        self.ecran_contact.ids.contact_message.text = ""
         self.retour_profil()
 
     # ==========================================
@@ -106,8 +133,7 @@ class ConciergerieApp(MDApp):
                 self.root.ids.message_erreur.text = "Email ou mot de passe incorrect."
                 return
 
-            id_trouve = utilisateur['id_user']
-            role = Database.get_user_role(id_trouve)
+            role = Database.get_user_role(utilisateur['id_user'])
 
             if role == "client":
                 self.utilisateur_courant = utilisateur
@@ -115,14 +141,9 @@ class ConciergerieApp(MDApp):
                 
                 widget_p = self.ecran_client.ids.contenu_profil
                 profil.charger_donnees_profil(widget_p, utilisateur)
-                
                 self.filter_services("") 
-            elif role == "admin":
-                self.root.current = "espace_admin"
-            elif role == "technicien":
-                self.root.current = "espace_technicien"
             else:
-                self.root.ids.message_erreur.text = "Erreur : Rôle non défini."
+                self.root.current = f"espace_{role}"
 
         except Exception as e:
             print(f"Erreur BDD : {e}")
@@ -149,7 +170,7 @@ class ConciergerieApp(MDApp):
             label_msg.text = "Erreur lors de l'inscription."
 
     # ==========================================
-    # RECHERCHE
+    # RECHERCHE SERVICES
     # ==========================================
     def filter_services(self, query=""):
         container = self.ecran_client.ids.container_prestations

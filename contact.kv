@@ -1,0 +1,74 @@
+MDScreen:
+    name: "page_contact"
+    md_bg_color: "#F7F5F5" # Fond gris clair
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        # Barre du haut (Design harmonisé)
+        MDTopAppBar:
+            title: "Nous contacter"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: "#691C32"
+            left_action_items: [["arrow-left", lambda x: app.retour_profil()]]
+
+        MDScrollView:
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: dp(30)
+                spacing: dp(20)
+
+                MDLabel:
+                    text: "Envoyez-nous un message"
+                    font_style: "H6"
+                    bold: True
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "#691C32"
+                
+                MDLabel:
+                    text: "Les champs marqués d'un * sont obligatoires."
+                    font_style: "Caption"
+                    theme_text_color: "Secondary"
+                    halign: "center"
+
+                # Champs du formulaire
+                MDTextField:
+                    id: contact_nom
+                    hint_text: "Nom *"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: contact_prenom
+                    hint_text: "Prénom *"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: contact_email
+                    hint_text: "Email *"
+                    icon_right: "email"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: contact_tel
+                    hint_text: "Téléphone"
+                    icon_right: "phone"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: contact_message
+                    hint_text: "Votre message détaillé... *"
+                    mode: "rectangle"
+                    multiline: True
+                    max_height: "150dp"
+
+                # Bouton d'envoi
+                MDRaisedButton:
+                    text: "ENVOYER MA DEMANDE"
+                    pos_hint: {"center_x": 0.5}
+                    size_hint_x: 0.9
+                    md_bg_color: "#691C32"
+                    on_release: 
+                        app.envoyer_contact(contact_nom.text, contact_prenom.text, contact_email.text, contact_tel.text, contact_message.text)

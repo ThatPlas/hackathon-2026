@@ -49,18 +49,18 @@ def create_users(nom, prenom, email, mdp):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # 1. On crée l'utilisateur (Votre code d'origine)
+        # 1. On crée l'utilisateur
         cursor.execute("INSERT INTO user (nom, prenom, email, mdp) VALUES (%s, %s, %s, %s)",
                        (nom, prenom, email, mdp))
         
-        # 2. LA NOUVEAUTÉ : On récupère l'ID généré par la base de données
+        # 2. On récupère l'ID généré par la base de données
         nouvel_id = cursor.lastrowid
         
-        # 3. LA NOUVEAUTÉ : On déclare automatiquement cette personne comme Client
+        # 3. On déclare automatiquement cette personne comme Client
         cursor.execute("INSERT INTO client (id_user) VALUES (%s)", (nouvel_id,))
         
         conn.commit()
-        return True # On renvoie True pour dire à l'écran Kivy que c'est un succès
+        return True
     except Exception as e:
         print(f"Erreur lors de la création : {e}")
         return False
@@ -87,7 +87,7 @@ def get_users_details(user_id):
     return user
 
 def update_user_details(user_id, nom, prenom, email, telephone, adresse):
-    """Met à jour toutes les informations de l'utilisateur"""
+    """Met à jour toutes les informations de l'utilisateur (incluant tel et adresse)"""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -132,7 +132,6 @@ def mark_notif_as_read(notif_id):
     cursor.close()
     conn.close()
 
-
 def get_prestations_by_user(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -165,8 +164,6 @@ def get_user_history(user_id):
     conn.close()
     return history
 
-from datetime import datetime, timedelta
-
 def cancel_prestation(presta_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -194,19 +191,6 @@ def cancel_prestation(presta_id):
     conn.close()
     
     return nouveau_statut
-
-def get_all_technicians():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT u.id_user, u.nom, u.prenom 
-        FROM user u
-        JOIN technicien t ON u.id_user = t.id_user
-    """)
-    techs = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return techs
 
 def assign_technician_to_prestation(id_presta, id_tech):
     conn = get_connection()
@@ -281,8 +265,5 @@ def get_user_role(user_id):
         return None
         
     finally:
-        # Le mot 'finally' doit être EXACTEMENT aligné avec le mot 'try'
         cursor.close()
         conn.close()
-    
-    
