@@ -280,3 +280,30 @@ def get_user_role(user_id):
         # Le mot 'finally' doit être EXACTEMENT aligné avec le mot 'try'
         cursor.close()
         conn.close()
+def get_technician_dispos(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, d.id_user 
+        FROM prestation p
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s
+    """, (tech_id,))
+    dispos = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return dispos
+
+def get_technician_history(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, d.id_user 
+        FROM prestation p
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s AND p.status IN ('confirmée', 'terminée')
+    """, (tech_id,))
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return history
