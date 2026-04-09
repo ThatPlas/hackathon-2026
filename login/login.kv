@@ -1,0 +1,90 @@
+MDScreenManager:
+    id: gestionnaire_ecrans
+
+    # ==========================================
+    # 1. PAGE DE CONNEXION (La porte d'entrée)
+    # ==========================================
+    MDScreen:
+        name: "page_connexion"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: "20dp"
+            spacing: "20dp"
+            pos_hint: {"center_y": 0.6}
+            adaptive_height: True
+
+            # Le Logo (Attention au chemin relatif depuis le dossier login)
+            Image:
+                source: "../logo.png" 
+                size_hint_y: None
+                height: "100dp"
+                pos_hint: {"center_x": 0.5}
+
+            MDLabel:
+                text: "Connexion"
+                font_style: "H4"
+                halign: "center"
+                bold: True
+                theme_text_color: "Primary"
+
+            # Champ Email
+            MDTextField:
+                id: champ_email
+                hint_text: "Adresse Email"
+                icon_right: "email"
+                mode: "rectangle"
+
+            # Champ Mot de passe
+            MDTextField:
+                id: champ_mdp
+                hint_text: "Mot de passe"
+                icon_right: "eye-off"
+                mode: "rectangle"
+                password: True # Cache les caractères
+
+            # Message d'erreur (invisible par défaut)
+            MDLabel:
+                id: message_erreur
+                text: ""
+                theme_text_color: "Error"
+                halign: "center"
+                size_hint_y: None
+                height: self.texture_size[1]
+
+            # Bouton de connexion existant
+            MDRaisedButton:
+                text: "SE CONNECTER"
+                pos_hint: {"center_x": 0.5}
+                size_hint_x: 0.8
+                md_bg_color: "#691C32" # Votre rouge Bordeaux
+                on_release: app.tenter_connexion(champ_email.text, champ_mdp.text)
+
+            # --- NOUVEAU BOUTON AJOUTÉ ICI ---
+            MDTextButton:
+                text: "Pas encore de compte ? S'inscrire"
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Secondary"
+                on_release: app.aller_a_inscription()
+
+
+    # ==========================================
+    # 2. LES PAGES DE REDIRECTION (Vides pour le test)
+    # ==========================================
+    MDScreen:
+        name: "espace_admin"
+        MDLabel:
+            text: "BIENVENUE DANS L'ESPACE ADMIN"
+            halign: "center"
+
+    MDScreen:
+        name: "espace_technicien"
+        MDLabel:
+            text: "BIENVENUE DANS L'ESPACE TECHNICIEN"
+            halign: "center"
+
+    MDScreen:
+        name: "espace_client"
+        MDLabel:
+            text: "BIENVENUE DANS L'ESPACE CLIENT"
+            halign: "center"
