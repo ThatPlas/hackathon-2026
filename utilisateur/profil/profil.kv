@@ -1,0 +1,150 @@
+<ProfilContent@MDBoxLayout>:
+    orientation: 'vertical'
+    md_bg_color: "#F7F5F5"
+
+    MDTopAppBar:
+        title: "Mon Profil"
+        anchor_title: "center"
+        elevation: 0
+        md_bg_color: "#691C32"
+        right_action_items: [["logout", lambda x: app.deconnexion()]]
+
+    MDScrollView:
+        MDBoxLayout:
+            orientation: 'vertical'
+            adaptive_height: True
+            padding: dp(20)
+            spacing: dp(25)
+
+            # --- SECTION HAUT : Photo et Nom ---
+            MDBoxLayout:
+                orientation: 'horizontal'
+                adaptive_height: True
+                spacing: dp(20)
+                FitImage:
+                    source: "../images/profil_logo.png"
+                    size_hint: None, None
+                    size: dp(100), dp(100)
+                    radius: [50, ]
+                MDLabel:
+                    id: label_nom_titre
+                    text: "Chargement..."
+                    font_style: "H5"
+                    bold: True
+                    pos_hint: {"center_y": .5}
+
+            # --- SECTION MILIEU : Carte des informations ---
+            MDCard:
+                orientation: 'vertical'
+                adaptive_height: True
+                radius: [dp(15),]
+                padding: dp(10)
+                elevation: 1
+                md_bg_color: 1, 1, 1, 1
+
+                MDList:
+                    TwoLineIconListItem:
+                        id: item_tel
+                        text: "Téléphone"
+                        secondary_text: ""
+                        IconLeftWidget:
+                            icon: "phone-outline"
+                            theme_text_color: "Custom"
+                            text_color: "#691C32"
+
+                    TwoLineIconListItem:
+                        id: item_adresse
+                        text: "Adresse"
+                        secondary_text: ""
+                        IconLeftWidget:
+                            icon: "map-marker-outline"
+                            theme_text_color: "Custom"
+                            text_color: "#691C32"
+
+            # --- SECTION LISTE : Historique ---
+            MDLabel:
+                text: "Vos dernières prestations"
+                font_style: "H6"
+                bold: True
+                adaptive_height: True
+            
+            MDCard:
+                adaptive_height: True
+                radius: [dp(15),]
+                elevation: 1
+                md_bg_color: 1, 1, 1, 1
+                MDList:
+                    id: liste_historique
+                    # (Les prestations s'ajouteront ici)
+
+            # ==========================================
+            # --- NOUVELLE SECTION : BOUTONS D'ACTION ---
+            # ==========================================
+            MDGridLayout:
+                cols: 4
+                adaptive_height: True
+                spacing: dp(5)
+                padding: [0, dp(20), 0, dp(20)] # Un peu d'espace au dessus et en dessous
+
+                # Bouton 1 : Paiement
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: dp(5)
+                    MDIconButton:
+                        icon: "credit-card-check-outline"
+                        pos_hint: {"center_x": .5}
+                        icon_size: "32sp"
+                        # on_release: app.aller_vers_paiement() # A activer plus tard
+                    MDLabel:
+                        text: "Paiement"
+                        halign: "center"
+                        font_style: "Caption"
+                        adaptive_height: True
+
+                # Bouton 2 : Modifier infos
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: dp(5)
+                    MDIconButton:
+                        icon: "account-edit-outline"
+                        pos_hint: {"center_x": .5}
+                        icon_size: "32sp"
+                        on_release: app.aller_vers_modifier_profil()
+                    MDLabel:
+                        text: "Modifier mes\ninformations"
+                        halign: "center"
+                        font_style: "Caption"
+                        adaptive_height: True
+
+                # Bouton 3 : Nous connaître
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: dp(5)
+                    MDIconButton:
+                        icon: "account-group-outline" 
+                        pos_hint: {"center_x": .5}
+                        icon_size: "32sp"
+                    MDLabel:
+                        text: "Nous\nconnaître"
+                        halign: "center"
+                        font_style: "Caption"
+                        adaptive_height: True
+
+                # Bouton 4 : Nous contacter
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: dp(5)
+                    MDIconButton:
+                        icon: "headset"
+                        pos_hint: {"center_x": .5}
+                        icon_size: "32sp"
+                        on_release: app.aller_vers_contact()
+                    MDLabel:
+                        text: "Nous\ncontacter"
+                        halign: "center"
+                        font_style: "Caption"
+                        adaptive_height: True

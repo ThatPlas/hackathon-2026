@@ -1,4 +1,4 @@
-MDScreen:
+<RechercheContent@MDScreen>:
     ScreenManager:
         id: search_screen_manager
         
@@ -13,7 +13,7 @@ MDScreen:
                     size_hint_y: None
                     height: dp(60)
                     Image:
-                        source: 'logo.png'
+                        source: '../logo.png' # Chemin corrigé
                         size_hint: None, None
                         size: dp(150), dp(60)
                         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -59,7 +59,7 @@ MDScreen:
                             search_screen_manager.current = 'liste_recherche'
                     
                     Image:
-                        source: 'logo.png' 
+                        source: '../logo.png' # Chemin corrigé
                         size_hint: None, None
                         size: dp(120), dp(40)
                         pos_hint: {'center_y': 0.5}
@@ -100,7 +100,6 @@ MDScreen:
                             id: input_hour
                             hint_text: "Heure (8-16)"
 
-                    # --- AJOUT DE L'AFFICHAGE DU PRIX ---
                     MDLabel:
                         id: detail_prix
                         text: "Prix : 0.00 €"
@@ -116,6 +115,7 @@ MDScreen:
                         pos_hint: {"center_x": .5}
                         md_bg_color: "#691C32"
                         size_hint_x: 1
+                        radius: [dp(20), dp(20), dp(20), dp(20)] 
                         on_release: app.ajouter_prestation()
 
         # --- ECRAN 3 : LE PANIER ---
@@ -160,10 +160,11 @@ MDScreen:
                         text_color: "#691C32"
                 
                 MDFillRoundFlatButton:
-                    text: "PAYER"
+                    text: "RESERVER"
                     pos_hint: {"center_x": .5}
                     md_bg_color: "#691C32"
                     size_hint_x: 1
+                    radius: [dp(20), dp(20), dp(20), dp(20)] 
                     on_release: app.payer_commande()
 
 <ServiceCard>:

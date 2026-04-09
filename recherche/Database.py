@@ -5,7 +5,7 @@ def get_connection():
         host="localhost",
         user="root",
         password="",
-        database="conciergerie-desruelle"
+        database="conciergerie_desruelle"
     )
 
 def get_categories():

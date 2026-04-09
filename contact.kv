@@ -1,193 +1,74 @@
 MDScreen:
     name: "page_contact"
-    md_bg_color: "#ffffff" 
+    md_bg_color: "#F7F5F5" # Fond gris clair
 
     MDBoxLayout:
         orientation: "vertical"
 
+        # Barre du haut (Design harmonisé)
         MDTopAppBar:
-            type: "small"
-            md_bg_color: "#ffffff" 
-            elevation: 1 
-            
-            MDTopAppBarLeadingButtonContainer:
-                MDActionTopAppBarButton:
-                    icon: "arrow-left"
-                    theme_icon_color: "Custom"
-                    icon_color: "#691C32"
-                    on_release: app.retour_profil()
-
-            MDTopAppBarTitle:
-                text: "Contact"
-                pos_hint: {"center_x": .5}
-                theme_text_color: "Custom"
-                text_color: "#691C32"
-                bold: True
+            title: "Nous contacter"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: "#691C32"
+            left_action_items: [["arrow-left", lambda x: app.retour_profil()]]
 
         MDScrollView:
-            do_scroll_x: False
-            
             MDBoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
-                padding: ["30dp", "30dp", "30dp", "30dp"]
-                spacing: "16dp"
-
-
-                MDWidget:
-                    size_hint_y: None
-                    height: "16dp"
+                padding: dp(30)
+                spacing: dp(20)
 
                 MDLabel:
-                    text: "Nous écrire"
-                    font_style: "Headline"
-                    role: "small"
+                    text: "Envoyez-nous un message"
+                    font_style: "H6"
+                    bold: True
+                    halign: "center"
                     theme_text_color: "Custom"
                     text_color: "#691C32"
-                    bold: True
-                    adaptive_height: True
+                
+                MDLabel:
+                    text: "Les champs marqués d'un * sont obligatoires."
+                    font_style: "Caption"
+                    theme_text_color: "Secondary"
                     halign: "center"
 
-                MDWidget:
-                    size_hint_y: None
-                    height: "8dp"
+                # Champs du formulaire
+                MDTextField:
+                    id: contact_nom
+                    hint_text: "Nom *"
+                    mode: "rectangle"
 
-                MDBoxLayout:
-                    orientation: "vertical"
-                    adaptive_height: True
-                    spacing: "12dp"
-                    margin: "20dp"
+                MDTextField:
+                    id: contact_prenom
+                    hint_text: "Prénom *"
+                    mode: "rectangle"
 
-                    MDBoxLayout:
-                        orientation: "horizontal"
-                        adaptive_height: True
-                        spacing: "16dp"
+                MDTextField:
+                    id: contact_email
+                    hint_text: "Email *"
+                    icon_right: "email"
+                    mode: "rectangle"
 
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Nom [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_nom
-                                mode: "outlined"
-                                hint_text: "Votre nom"
+                MDTextField:
+                    id: contact_tel
+                    hint_text: "Téléphone"
+                    icon_right: "phone"
+                    mode: "rectangle"
 
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Prénom [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_prenom
-                                mode: "outlined"
-                                hint_text: "Votre prénom"
+                MDTextField:
+                    id: contact_message
+                    hint_text: "Votre message détaillé... *"
+                    mode: "rectangle"
+                    multiline: True
+                    max_height: "150dp"
 
-                    MDBoxLayout:
-                        orientation: "horizontal"
-                        adaptive_height: True
-                        spacing: "16dp"
-
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Adresse [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_adresse
-                                mode: "outlined"
-                                hint_text: "Votre adresse"
-
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Ville [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_ville
-                                mode: "outlined"
-                                hint_text: "Votre ville"
-
-                    MDBoxLayout:
-                        orientation: "horizontal"
-                        adaptive_height: True
-                        spacing: "16dp"
-
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Email [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_email
-                                mode: "outlined"
-                                hint_text: "Votre adresse email"
-
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            adaptive_height: True
-                            spacing: "4dp"
-                            MDLabel:
-                                text: "Téléphone [color=#f44336]*[/color]"
-                                markup: True
-                                theme_text_color: "Primary"
-                            MDTextField:
-                                id: contact_telephone
-                                mode: "outlined"
-                                hint_text: "+33"
-
-                    MDBoxLayout:
-                        orientation: "vertical"
-                        adaptive_height: True
-                        spacing: "4dp"
-
-                        MDLabel:
-                            text: "Message"
-                            theme_text_color: "Primary"
-
-                        MDTextField:
-                            id: contact_message
-                            mode: "outlined"
-                            hint_text: "Votre message détaillé..."
-                            multiline: True
-                            max_height: "250dp" 
-
-                MDButton:
-                    style: "filled"
+                # Bouton d'envoi
+                MDRaisedButton:
+                    text: "ENVOYER MA DEMANDE"
                     pos_hint: {"center_x": 0.5}
-                    size_hint_x: 0.9 
-                    height: "50dp"
-                    md_bg_color: "#691C32" 
+                    size_hint_x: 0.9
+                    md_bg_color: "#691C32"
                     on_release: 
-                        app.envoyer_contact( \
-                        contact_nom.text, \
-                        contact_prenom.text, \
-                        contact_adresse.text, \
-                        contact_ville.text, \
-                        contact_email.text, \
-                        contact_telephone.text, \
-                        contact_message.text)
-
-                    MDButtonText:
-                        text: "ENVOYER MA DEMANDE"
-                        bold: True
-                        pos_hint: {"center_x": .5, "center_y": .5}
-
-                MDBoxLayout:
-                    size_hint_y: None
-                    height: "32dp"
+                        app.envoyer_contact(contact_nom.text, contact_prenom.text, contact_email.text, contact_tel.text, contact_message.text)
