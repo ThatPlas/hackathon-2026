@@ -1,11 +1,17 @@
 import mysql.connector
+from datetime import datetime, timedelta
 
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
+<<<<<<< HEAD
         password="",
         database="conciergerie-desruelle"
+=======
+        password="root",
+        database="conciergerie_desruelle"
+>>>>>>> b46f3310aeb19aaa86ccbea77c95824cbe26448c
     )
 
 def get_categories():
@@ -47,11 +53,25 @@ def user_exists(email):
 def create_users(nom, prenom, email, mdp):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO user (nom, prenom, email, mdp) VALUES (%s, %s, %s, %s)",
-                   (nom, prenom, email, mdp))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        # 1. On crée l'utilisateur (Votre code d'origine)
+        cursor.execute("INSERT INTO user (nom, prenom, email, mdp) VALUES (%s, %s, %s, %s)",
+                       (nom, prenom, email, mdp))
+        
+        # 2. LA NOUVEAUTÉ : On récupère l'ID généré par la base de données
+        nouvel_id = cursor.lastrowid
+        
+        # 3. LA NOUVEAUTÉ : On déclare automatiquement cette personne comme Client
+        cursor.execute("INSERT INTO client (id_user) VALUES (%s)", (nouvel_id,))
+        
+        conn.commit()
+        return True # On renvoie True pour dire à l'écran Kivy que c'est un succès
+    except Exception as e:
+        print(f"Erreur lors de la création : {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
 def authenticate_users(email, mdp):
     conn = get_connection()
@@ -149,6 +169,7 @@ def get_services_by_category(category_id):
     conn.close()
     return services
 
+<<<<<<< HEAD
 def get_type_prestas_by_category(category_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -183,3 +204,183 @@ def get_user_panier(user_id):
     cursor.close()
     conn.close()
     return res
+=======
+def get_prestations_by_user(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, GROUP_CONCAT(tp.nom_type_presta) AS types_presta
+        FROM presta p
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        WHERE p.id_user = %s
+        GROUP BY p.id_presta
+    """, (user_id,))
+    prestations = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return prestations
+
+def get_user_history(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.id_presta, p.status, p.debut_contrat, p.prix_total, tp.nom 
+        FROM prestation p
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        WHERE p.id_user = %s
+        ORDER BY p.debut_contrat DESC
+    """, (user_id,))
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return history
+
+from datetime import datetime, timedelta
+
+def cancel_prestation(presta_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute("SELECT debut_contrat FROM prestation WHERE id_presta = %s", (presta_id,))
+    presta = cursor.fetchone()
+    
+    if not presta:
+        cursor.close()
+        conn.close()
+        return "Prestation introuvable"
+
+    maintenant = datetime.now()
+    debut = presta['debut_contrat']
+    
+    peut_etre_rembourse = (debut - maintenant) > timedelta(hours=24)
+
+    nouveau_statut = "Annulée - Remboursée" if peut_etre_rembourse else "Annulée - Non remboursée"
+    
+    cursor.execute("UPDATE prestation SET status = %s WHERE id_presta = %s", 
+                   (nouveau_statut, presta_id))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return nouveau_statut
+
+def get_all_technicians():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT u.id_user, u.nom, u.prenom 
+        FROM user u
+        JOIN technicien t ON u.id_user = t.id_user
+    """)
+    techs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return techs
+
+def assign_technician_to_prestation(id_presta, id_tech):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO disponibilite (id_user, id_presta) VALUES (%s, %s)", 
+                       (id_tech, id_presta))
+        
+        cursor.execute("UPDATE prestation SET status = 'confirmée' WHERE id_presta = %s", 
+                       (id_presta,))
+        
+        cursor.execute("INSERT INTO notif (message, id_prestation, a_lu) VALUES (%s, %s, %s)",
+                       (f"Nouvelle mission assignée : #{id_presta}", id_presta, 'Non'))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Erreur d'assignation : {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_unassigned_prestations():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom
+        FROM prestation p
+        JOIN user u ON p.id_user = u.id_user
+        LEFT JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user IS NULL AND p.status = 'en attente'
+    """)
+    unassigned = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return unassigned
+
+def get_all_technicians():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT u.id_user, u.nom, u.prenom, u.email 
+        FROM user u
+        JOIN technicien t ON u.id_user = t.id_user
+    """)
+    techs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return techs
+
+def get_user_role(user_id):
+    """Cherche dans les tables enfants pour déterminer le rôle de l'utilisateur"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Test 1 : Admin ?
+        cursor.execute("SELECT id_user FROM admin WHERE id_user = %s", (user_id,))
+        if cursor.fetchone(): return "admin"
+
+        # Test 2 : Technicien ?
+        cursor.execute("SELECT id_user FROM technicien WHERE id_user = %s", (user_id,))
+        if cursor.fetchone(): return "technicien"
+
+        # Test 3 : Client ?
+        cursor.execute("SELECT id_user FROM client WHERE id_user = %s", (user_id,))
+        if cursor.fetchone(): return "client"
+
+        # Si trouvé nulle part
+        return None
+        
+    finally:
+        # Le mot 'finally' doit être EXACTEMENT aligné avec le mot 'try'
+        cursor.close()
+        conn.close()
+def get_technician_dispos(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, d.id_user 
+        FROM prestation p
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s
+    """, (tech_id,))
+    dispos = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return dispos
+
+def get_technician_history(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, d.id_user 
+        FROM prestation p
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s AND p.status IN ('confirmée', 'terminée')
+    """, (tech_id,))
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return history
+>>>>>>> b46f3310aeb19aaa86ccbea77c95824cbe26448c
