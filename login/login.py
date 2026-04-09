@@ -3,7 +3,8 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
-from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget
+from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget, TwoLineAvatarIconListItem, ImageLeftWidget
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.label import MDLabel
 from kivy.metrics import dp
@@ -25,7 +26,6 @@ import Database
 Window.size = (400, 800)
 
 class ServiceCard(MDCard):
-    """Classe pour les cartes d'aperçu des services avec animation"""
     image_source = StringProperty("")
     title_text = StringProperty("")
     expanded = BooleanProperty(False)
@@ -40,6 +40,7 @@ class ServiceCard(MDCard):
 class ConciergerieApp(MDApp):
     utilisateur_courant = None 
     current_service_id = NumericProperty(0)
+    presta_actuelle_id = NumericProperty(None) # Pour l'Admin
 
     def build(self):
         self.theme_cls.primary_palette = "Red"
@@ -60,6 +61,11 @@ class ConciergerieApp(MDApp):
         chemin_contact = os.path.join(ROOT_DIR, 'contact.kv')
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
+
+        # Ajout de l'écran Admin
+        chemin_admin = os.path.join(ROOT_DIR, 'admin.kv')
+        self.ecran_admin = Builder.load_file(chemin_admin)
+        sm.add_widget(self.ecran_admin)
         
         return sm
 
@@ -90,7 +96,139 @@ class ConciergerieApp(MDApp):
         self.root.current = "page_contact"
 
     # ==========================================
-    # LOGIQUE RECHERCHE ET PANIER (Fusionnée)
+    # LOGIQUE ADMIN
+    # ==========================================
+    def aller_vers_admin(self, nom_ecran):
+        """Permet de naviguer dans les sous-pages de l'admin"""
+        self.ecran_admin.ids.admin_sm.current = nom_ecran
+
+    def creer_list_item(self, titre, sous_titre, action_menu):
+        item = TwoLineAvatarIconListItem(text=titre, secondary_text=sous_titre, bg_color=(1, 1, 1, 1))
+        item.add_widget(ImageLeftWidget(source="")) # Optionnel : Avatar
+        btn = IconRightWidget(icon="dots-vertical")
+        btn.bind(on_release=lambda x, inst=btn: action_menu(inst))
+        item.add_widget(btn)
+        return item
+
+    def charger_apercu_rapide(self):
+        ui = self.ecran_admin.ids
+        ui.list_last_techs.clear_widgets()
+        for tech in Database.get_last_5_techs():
+            item = self.creer_list_item(f"{tech['prenom']} {tech['nom']}", "Technicien", 
+                                        lambda inst, tid=tech['id_user']: self.ouvrir_menu_tech(inst, tid))
+            ui.list_last_techs.add_widget(item)
+
+        status_mapping = {
+            "En attente": ui.list_attente,
+            "Confirmée": ui.list_confirmees,
+            "Terminée": ui.list_terminees
+        }
+        for status, widget in status_mapping.items():
+            widget.clear_widgets()
+            for p in Database.get_last_5_prestas_by_status(status):
+                item = self.creer_list_item(f"Prestation n°{p['id_presta']}", p['adresse'], 
+                                            lambda inst, pid=p['id_presta']: self.ouvrir_menu_presta(inst, pid))
+                widget.add_widget(item)
+
+    def charger_tous_les_techniciens(self):
+        ui = self.ecran_admin.ids
+        ui.list_all_techs.clear_widgets()
+        for tech in Database.get_all_technicians(): 
+            item = self.creer_list_item(f"{tech['prenom']} {tech['nom']}", "Technicien", 
+                                        lambda inst, tid=tech['id_user']: self.ouvrir_menu_tech(inst, tid))
+            ui.list_all_techs.add_widget(item)
+
+    def ouvrir_menu_tech(self, button, tech_id):
+        menu_items = [{"viewclass": "OneLineListItem", "text": "Voir les détails", 
+                       "on_release": lambda: self.aller_vers_detail_tech(tech_id)}]
+        self.menu = MDDropdownMenu(caller=button, items=menu_items, width_mult=4)
+        self.menu.open()
+
+    def ouvrir_menu_presta(self, button, presta_id):
+        menu_items = [{"viewclass": "OneLineListItem", "text": "Voir les détails", 
+                       "on_release": lambda: self.aller_vers_detail_presta(presta_id)}]
+        self.menu = MDDropdownMenu(caller=button, items=menu_items, width_mult=4)
+        self.menu.open()
+
+    def aller_vers_detail_tech(self, tech_id):
+        self.menu.dismiss()
+        ui = self.ecran_admin.ids
+        tech = Database.get_users_details(tech_id) 
+        ui.dt_nom.text = f"{tech['prenom']} {tech['nom']}"
+        ui.dt_email.text = tech['email']
+        
+        ui.dt_list_prestas.clear_widgets()
+        prestas_tech = Database.get_tech_latest_prestas(tech_id)
+        if prestas_tech:
+            for p in prestas_tech:
+                item = TwoLineAvatarIconListItem(text=f"Prestation n°{p['id_presta']} ({p['status']})", secondary_text=p['adresse'])
+                ui.dt_list_prestas.add_widget(item)
+        else:
+            ui.dt_list_prestas.add_widget(OneLineListItem(text="Aucune prestation pour le moment."))
+            
+        self.aller_vers_admin("detail_tech")
+
+    def aller_vers_detail_presta(self, presta_id):
+        self.menu.dismiss()
+        ui = self.ecran_admin.ids
+        self.presta_actuelle_id = presta_id 
+        p = Database.get_presta_details(presta_id)
+        
+        ui.dp_titre.text = f"Prestation n°{p['id_presta']}"
+        color = "red" if p['status'] == "En attente" else "green" if p['status'] == "Confirmée" else "gray"
+        ui.dp_status.text = f"[color={color}]({p['status']})[/color]"
+        ui.dp_client.text = f"Client : {p['client_prenom']} {p['client_nom']}"
+        
+        debut = p.get('debut_contrat', 'N/A')
+        ui.dp_dates.text = f"Début : {debut}"
+        ui.dp_adresse.text = f"Adresse : {p['adresse']}"
+        
+        show_btn = p['status'] != "Terminée"
+        ui.btn_assigner.opacity = 1 if show_btn else 0
+        ui.btn_assigner.disabled = not show_btn
+        
+        self.aller_vers_admin("detail_presta")
+
+    def sauvegarder_technicien(self):
+        ui = self.ecran_admin.ids
+        nom = ui.input_nom.text
+        prenom = ui.input_prenom.text
+        email = ui.input_email.text
+        tel = ui.input_tel.text
+        mdp = ui.input_mdp.text
+        
+        if nom and prenom and email:
+            succes = Database.add_technicien(nom, prenom, email, tel, mdp)
+            if succes:
+                ui.input_nom.text = ""
+                ui.input_prenom.text = ""
+                ui.input_email.text = ""
+                ui.input_tel.text = ""
+                ui.input_mdp.text = ""
+                self.charger_tous_les_techniciens()
+                self.charger_apercu_rapide()
+                self.aller_vers_admin("main_admin")
+
+    def ouvrir_assignation(self):
+        ui = self.ecran_admin.ids
+        ui.list_techs_dispo.clear_widgets()
+        techs = Database.get_all_technicians()
+        
+        for tech in techs:
+            item = TwoLineAvatarIconListItem(text=f"{tech['prenom']} {tech['nom']}", secondary_text="Cliquer pour assigner")
+            item.bind(on_release=lambda x, tid=tech['id_user']: self.confirmer_assignation(tid))
+            ui.list_techs_dispo.add_widget(item)
+            
+        self.aller_vers_admin("assigner_tech")
+
+    def confirmer_assignation(self, tech_id):
+        if self.presta_actuelle_id:
+            Database.assign_technician_to_prestation(self.presta_actuelle_id, tech_id) 
+            self.charger_apercu_rapide()
+            self.aller_vers_detail_presta(self.presta_actuelle_id) 
+
+    # ==========================================
+    # LOGIQUE RECHERCHE ET PANIER
     # ==========================================
     def filter_services(self, query=""):
         try:
@@ -261,6 +399,12 @@ class ConciergerieApp(MDApp):
                 widget_p = self.ecran_client.ids.contenu_profil
                 profil.charger_donnees_profil(widget_p, utilisateur)
                 self.filter_services("") 
+            
+            elif role == "admin":
+                self.utilisateur_courant = utilisateur
+                self.root.current = "espace_admin"
+                self.charger_apercu_rapide() # Charge directement le dashboard Admin !
+            
             else:
                 self.root.current = f"espace_{role}"
         except Exception as e:
