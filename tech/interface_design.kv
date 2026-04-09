@@ -1,0 +1,25 @@
+MDScreen:
+
+    MDBottomNavigation:
+
+        MDBottomNavigationItem:
+            name:'accueil'
+        
+        MDBottomNavigationItem:
+            name:'prestation'
+
+        MDBottomNavigationItem:
+            name:'historique'
+
+            MDScrollView:
+                MDBoxLayout:
+                    id: container_prestations
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: dp(20)
+                    spacing: dp(15)
+                    
+        MDBottomNavigationItem:
+            name:'profil'   
+
+        
