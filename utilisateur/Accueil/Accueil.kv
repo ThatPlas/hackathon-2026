@@ -1,3 +1,5 @@
+#:include utilisateur/profil/profil.kv
+
 MDScreen:
     name: "espace_client" 
 
@@ -6,13 +8,12 @@ MDScreen:
         panel_color: "#F7F5F5"
         text_color_active: "#691C32"
 
+        # --- ONGLET 1 : RECHERCHE ---
         MDBottomNavigationItem:
             name: 'page_recherche'
             text: 'Rechercher'
             icon: 'magnify'
             
-
-
             MDBoxLayout:
                 orientation: 'vertical'
                 padding: [0, dp(10), 0, 0]
@@ -40,6 +41,7 @@ MDScreen:
                         padding: dp(20)
                         spacing: dp(15)
 
+        # --- ONGLET 2 : ACCUEIL ---
         MDBottomNavigationItem:
             name: 'page_accueil'
             text: 'Accueil'
@@ -48,42 +50,17 @@ MDScreen:
                 text: "Bienvenue sur l'Accueil"
                 halign: "center"
 
+        # --- ONGLET 3 : PROFIL (Appelle ton fichier profil.kv) ---
         MDBottomNavigationItem:
             name: 'page_profil'
             text: 'Profil'
             icon: 'account'
-            MDScrollView:
-                MDBoxLayout:
-                    orientation: 'vertical'
-                    adaptive_height: True
-                    padding: dp(20)
-                    spacing: dp(20)
+            
+            # On insère ici le composant défini dans profil.kv
+            ProfilContent:
+                id: contenu_profil
 
-                    MDBoxLayout:
-                        adaptive_height: True
-                        spacing: dp(20)
-                        FitImage:
-                            source: "profil_logo.png"
-                            size_hint: None, None
-                            size: dp(120), dp(120)
-                            radius: [self.width / 2,]
-                        MDLabel:
-                            text: "Jean-Michel\\nTest"
-                            font_style: "H5"
-                            bold: True
-                            pos_hint: {"center_y": .5}
-
-                    MDSeparator:
-
-                    MDLabel:
-                        text: "Vos dernières prestations"
-                        font_style: "H6"
-                        bold: True
-                        adaptive_height: True
-
-                    MDList:
-                        id: prestations_list
-
+# Définition des cartes de service pour l'onglet recherche
 <ServiceCard>:
     orientation: 'vertical'
     size_hint_y: None

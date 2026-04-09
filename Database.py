@@ -86,11 +86,15 @@ def get_users_details(user_id):
     conn.close()
     return user
 
-def update_user_details(user_id, nom, prenom, email):
+def update_user_details(user_id, nom, prenom, email, telephone, adresse):
+    """Met à jour toutes les informations de l'utilisateur"""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE user SET nom = %s, prenom = %s, email = %s WHERE id_user = %s",
-                   (nom, prenom, email, user_id))
+    cursor.execute("""
+        UPDATE user 
+        SET nom = %s, prenom = %s, email = %s, telephone = %s, adresse = %s 
+        WHERE id_user = %s
+    """, (nom, prenom, email, telephone, adresse, user_id))
     conn.commit()
     cursor.close()
     conn.close()
@@ -280,3 +284,5 @@ def get_user_role(user_id):
         # Le mot 'finally' doit être EXACTEMENT aligné avec le mot 'try'
         cursor.close()
         conn.close()
+    
+    
