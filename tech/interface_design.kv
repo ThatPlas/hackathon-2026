@@ -1,15 +1,55 @@
 MDScreen:
 
     MDBottomNavigation:
+        id: nav_bar
+        panel_color: "#F7F5F5"
+        text_color_active: "#691C32"
 
         MDBottomNavigationItem:
-            name:'accueil'
-        
-        MDBottomNavigationItem:
-            name:'prestation'
+            name:'Recherche'
+            icon:'clipboard-text-clock'
 
         MDBottomNavigationItem:
-            name:'historique'
+            name:'prestation_en_cours'
+            icon:'clipboard-list-outline'
+
+            MDBoxLayout:
+                id: container_prestations_type
+                orientation: 'vertical'
+                adaptive_height: True
+                padding: dp(20)
+                spacing: dp(20)
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: dp(20)
+                    spacing: dp(20)
+                    
+                    MDLabel:
+                        text: "Mes prestations en cours"
+                        font_style: "H6"
+                        bold: True
+                        adaptive_height: True
+
+                MDSeparator:
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: dp(20)
+                    spacing: dp(20)
+                    
+                    MDLabel:
+                        text: "Mes prestations fini"
+                        font_style: "H6"
+                        bold: True
+                        adaptive_height: True
+
+
+        MDBottomNavigationItem:
+            name:'prestation_historique'
+            icon:'history'
 
             MDScrollView:
                 MDBoxLayout:
@@ -18,8 +58,61 @@ MDScreen:
                     adaptive_height: True
                     padding: dp(20)
                     spacing: dp(15)
-                    
+
         MDBottomNavigationItem:
-            name:'profil'   
+            name:'calendar'
+            icon:'calendar-range'
+            MDScreen:
+                md_bg_color: app.theme_cls.bg_normal
+
+                MDTextField:
+                    id: field
+                    on_focus: app.show_date_picker(self.focus)
+                    hint_text: "Docked date picker"
+                    helper_text: "MM/DD/YYYY"
+                    helper_text_mode: "persistent"
+                    icon_right: "calendar"
+                    mode: "rectangle"
+                    pos_hint: {'center_x': .5, 'center_y': .85}
+                    size_hint_x: .5
+                    on_focus: app.show_date_picker(self.focus)
+
+        MDBottomNavigationItem:
+            name:'profil'
+            text: 'Profil'
+            icon: 'account'
+            MDScrollView:
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: dp(20)
+                    spacing: dp(20)
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(20)
+                        FitImage:
+                            source: "profil_logo.png"
+                            size_hint: None, None
+                            size: dp(120), dp(120)
+                            radius: [self.width / 2,]
+                        MDLabel:
+                            text: "Jean-Michel\\nTest"
+                            font_style: "H5"
+                            bold: True
+                            pos_hint: {"center_y": .5}
+
+                    MDSeparator:
+
+                    MDLabel:
+                        text: "Vos dernières prestations"
+                        font_style: "H6"
+                        bold: True
+                        adaptive_height: True
+
+                    MDList:
+                        id: prestations_list
+
+        
 
         
