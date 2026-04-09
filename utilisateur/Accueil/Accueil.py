@@ -26,6 +26,9 @@ class ConciergerieApp(MDApp):
         return Builder.load_file("Accueil.kv")
 
     def on_start(self):
+        page_accueil = Builder.load_file("Accueil.kv")
+        self.root.ids.content_accueil.add_widget(page_accueil)
+
         self.filter_services("") 
 
         try:
