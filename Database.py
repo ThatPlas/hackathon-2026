@@ -1,10 +1,11 @@
 import mysql.connector
+from datetime import datetime, timedelta
 
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="",
+        password="root",
         database="conciergerie_desruelle"
     )
 
@@ -128,6 +129,132 @@ def mark_notif_as_read(notif_id):
     conn.close()
 
 
+def get_prestations_by_user(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, GROUP_CONCAT(tp.nom_type_presta) AS types_presta
+        FROM presta p
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        WHERE p.id_user = %s
+        GROUP BY p.id_presta
+    """, (user_id,))
+    prestations = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return prestations
+
+def get_user_history(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.id_presta, p.status, p.debut_contrat, p.prix_total, tp.nom 
+        FROM prestation p
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        WHERE p.id_user = %s
+        ORDER BY p.debut_contrat DESC
+    """, (user_id,))
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return history
+
+from datetime import datetime, timedelta
+
+def cancel_prestation(presta_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute("SELECT debut_contrat FROM prestation WHERE id_presta = %s", (presta_id,))
+    presta = cursor.fetchone()
+    
+    if not presta:
+        cursor.close()
+        conn.close()
+        return "Prestation introuvable"
+
+    maintenant = datetime.now()
+    debut = presta['debut_contrat']
+    
+    peut_etre_rembourse = (debut - maintenant) > timedelta(hours=24)
+
+    nouveau_statut = "Annulée - Remboursée" if peut_etre_rembourse else "Annulée - Non remboursée"
+    
+    cursor.execute("UPDATE prestation SET status = %s WHERE id_presta = %s", 
+                   (nouveau_statut, presta_id))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return nouveau_statut
+
+def get_all_technicians():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT u.id_user, u.nom, u.prenom 
+        FROM user u
+        JOIN technicien t ON u.id_user = t.id_user
+    """)
+    techs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return techs
+
+def assign_technician_to_prestation(id_presta, id_tech):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO disponibilite (id_user, id_presta) VALUES (%s, %s)", 
+                       (id_tech, id_presta))
+        
+        cursor.execute("UPDATE prestation SET status = 'confirmée' WHERE id_presta = %s", 
+                       (id_presta,))
+        
+        cursor.execute("INSERT INTO notif (message, id_prestation, a_lu) VALUES (%s, %s, %s)",
+                       (f"Nouvelle mission assignée : #{id_presta}", id_presta, 'Non'))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Erreur d'assignation : {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_unassigned_prestations():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom
+        FROM prestation p
+        JOIN user u ON p.id_user = u.id_user
+        LEFT JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user IS NULL AND p.status = 'en attente'
+    """)
+    unassigned = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return unassigned
+
+def get_all_technicians():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT u.id_user, u.nom, u.prenom, u.email 
+        FROM user u
+        JOIN technicien t ON u.id_user = t.id_user
+    """)
+    techs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return techs
+
 def get_user_role(user_id):
     """Cherche dans les tables enfants pour déterminer le rôle de l'utilisateur"""
     conn = get_connection()
@@ -150,128 +277,33 @@ def get_user_role(user_id):
         return None
         
     finally:
+        # Le mot 'finally' doit être EXACTEMENT aligné avec le mot 'try'
         cursor.close()
         conn.close()
-
-
-def get_last_5_techs():
+def get_technician_dispos(tech_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT u.id_user, u.nom, u.prenom 
-        FROM user u 
-        INNER JOIN technicien t ON u.id_user = t.id_user 
-        ORDER BY u.id_user DESC LIMIT 5
-    """)
-    techs = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return techs
-
-def get_all_techs():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT u.id_user, u.nom, u.prenom 
-        FROM user u 
-        INNER JOIN technicien t ON u.id_user = t.id_user
-    """)
-    techs = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return techs
-
-def get_last_5_prestas_by_status(status):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT id_presta, status, adresse 
-        FROM prestation 
-        WHERE status = %s 
-        ORDER BY id_presta DESC LIMIT 5
-    """, (status,))
-    prestas = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return prestas
-
-def get_presta_details(presta_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.*, c.nom as client_nom, c.prenom as client_prenom
+        SELECT p.*, d.id_user 
         FROM prestation p
-        LEFT JOIN user c ON p.id_user = c.id_user
-        WHERE p.id_presta = %s
-    """, (presta_id,))
-    presta = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return presta
-
-def get_tech_details(tech_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM user WHERE id_user = %s", (tech_id,))
-    tech = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return tech
-
-# --- NOUVELLES REQUÊTES : AJOUT, ASSIGNATION, DÉTAILS ---
-
-def add_technicien(nom, prenom, email, telephone, mdp):
-    """Ajoute un nouveau technicien dans la base de données"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        # 1. Insertion dans la table USER
-        cursor.execute("""
-            INSERT INTO user (nom, prenom, email, telephone, mdp) 
-            VALUES (%s, %s, %s, %s, %s)
-        """, (nom, prenom, email, telephone, mdp))
-        nouvel_id = cursor.lastrowid
-        
-        # 2. Déclaration du rôle dans la table TECHNICIEN
-        cursor.execute("INSERT INTO technicien (id_user) VALUES (%s)", (nouvel_id,))
-        conn.commit()
-        return True
-    except Exception as e:
-        print(f"Erreur lors de l'ajout du technicien : {e}")
-        return False
-    finally:
-        cursor.close()
-        conn.close()
-
-def assign_tech_to_presta(id_presta, id_tech):
-    """Associe un technicien à une prestation et la passe en Confirmée"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        # Insertion dans la table de liaison DISPONIBILITE (selon ton MCD)
-        cursor.execute("INSERT INTO disponibilite (id_user, id_presta) VALUES (%s, %s)", (id_tech, id_presta))
-        
-        # On passe le statut à "Confirmée" si elle était "En attente"
-        cursor.execute("UPDATE prestation SET status = 'Confirmée' WHERE id_presta = %s AND status = 'En attente'", (id_presta,))
-        conn.commit()
-    except Exception as e:
-        print(f"Erreur d'assignation : {e}")
-    finally:
-        cursor.close()
-        conn.close()
-
-def get_tech_latest_prestas(id_tech):
-    """Récupère les 5 dernières prestations d'un technicien"""
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.id_presta, p.adresse, p.status 
-        FROM prestation p
-        INNER JOIN disponibilite d ON p.id_presta = d.id_presta
+        JOIN disponibilite d ON p.id_presta = d.id_presta
         WHERE d.id_user = %s
-        ORDER BY p.id_presta DESC LIMIT 5
-    """, (id_tech,))
-    prestas = cursor.fetchall()
+    """, (tech_id,))
+    dispos = cursor.fetchall()
     cursor.close()
     conn.close()
-    return prestas
+    return dispos
+
+def get_technician_history(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, d.id_user 
+        FROM prestation p
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s AND p.status IN ('confirmée', 'terminée')
+    """, (tech_id,))
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return history
