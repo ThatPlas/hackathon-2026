@@ -23,6 +23,12 @@
                         text_color: "#691C32"
                         pos_hint: {'right': 0.98, 'center_y': 0.5}
                         on_release: app.ouvrir_panier()
+                    MDIconButton:
+                        icon: "bell"
+                        theme_text_color: "Custom"
+                        text_color: "#691C32"
+                        pos_hint: {'right': 0.9, 'center_y': 0.5}
+                        on_release: app.ouvrir_notif()
 
                 MDBoxLayout:
                     adaptive_height: True

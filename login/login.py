@@ -18,6 +18,8 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
+# Import du composant Notif (Dossier notif / fichier notif.py)
+from notif.notif import NotifScreen 
 from utilisateur.profil import profil
 from utilisateur.profil.modification import modifier_profil 
 import Database
@@ -44,6 +46,14 @@ class ConciergerieApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Red"
         
+        # 1. Charger le KV des notifications (dans le dossier notif)
+        try:
+            chemin_notif_kv = os.path.join(ROOT_DIR, 'notif', 'notif.kv')
+            Builder.load_file(chemin_notif_kv)
+        except Exception as e:
+            print(f"Note : notif.kv non chargé ici : {e}")
+
+        # 2. Charger le ScreenManager principal (Login)
         sm = Builder.load_file("login.kv")
         
         chemin_insc = os.path.join(ROOT_DIR, 'inscription', 'inscription.kv')
@@ -61,6 +71,13 @@ class ConciergerieApp(MDApp):
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
         
+        # 3. Injecter l'écran de notification dans le ScreenManager de la Recherche
+        try:
+            recherche_sm = self.ecran_client.ids.contenu_recherche.ids.search_screen_manager
+            recherche_sm.add_widget(NotifScreen(name='page_notif'))
+        except Exception as e:
+            print(f"Erreur injection NotifScreen : {e}")
+
         return sm
 
     # ==========================================
@@ -90,8 +107,23 @@ class ConciergerieApp(MDApp):
         self.root.current = "page_contact"
 
     # ==========================================
-    # LOGIQUE RECHERCHE ET PANIER (Fusionnée)
+    # LOGIQUE RECHERCHE, PANIER ET NOTIF
     # ==========================================
+    def ouvrir_notif(self):
+        """Ouvre l'écran des notifications"""
+        try:
+            recherche_ui = self.ecran_client.ids.contenu_recherche.ids
+            recherche_ui.search_screen_manager.transition.direction = "left"
+            recherche_ui.search_screen_manager.current = 'page_notif'
+        except Exception as e:
+            print(f"Erreur navigation notif : {e}")
+
+    def retour_recherche(self):
+        """Retourne à la liste des prestations depuis les notifs"""
+        recherche_ui = self.ecran_client.ids.contenu_recherche.ids
+        recherche_ui.search_screen_manager.transition.direction = "right"
+        recherche_ui.search_screen_manager.current = 'liste_recherche'
+
     def filter_services(self, query=""):
         try:
             recherche_ui = self.ecran_client.ids.contenu_recherche.ids

@@ -291,3 +291,34 @@ def get_user_role(user_id):
     finally:
         cursor.close()
         conn.close()
+
+
+def get_notifications(id_user):
+    """
+    Récupère toutes les notifications pour un utilisateur spécifique
+    en utilisant la connexion standard du fichier.
+    """
+    conn = None
+    try:
+        conn = get_connection() # On utilise la fonction de connexion qui marche
+        cursor = conn.cursor(dictionary=True)
+        
+        # On récupère les notifs liées aux prestations du client
+        query = """
+            SELECT n.message, n.date_message, n.a_lu
+            FROM notif n
+            INNER JOIN prestation p ON n.id_prestation = p.id_presta
+            WHERE p.id_user = %s
+            ORDER BY n.date_message DESC
+        """
+        cursor.execute(query, (id_user,))
+        resultats = cursor.fetchall()
+        cursor.close()
+        return resultats
+        
+    except Exception as e:
+        print(f"Erreur SQL get_notifications : {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
