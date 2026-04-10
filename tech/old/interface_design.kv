@@ -1,0 +1,260 @@
+BoxLayout:
+    id: root_layout
+    orientation: "vertical"
+
+    ScreenManager:
+        id: screen_manager
+
+        # ------------------- Login -------------------
+        Screen:
+            name: "login_screen"
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: dp(20)
+                spacing: dp(20)
+
+                MDTextField:
+                    id: login_email
+                    hint_text: "Email"
+
+                MDTextField:
+                    id: login_password
+                    hint_text: "Mot de passe"
+                    password: True
+
+                MDRaisedButton:
+                    text: "Se connecter"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.tenter_connexion(login_email.text, login_password.text)
+
+                MDLabel:
+                    id: login_msg
+                    text: ""
+                    theme_text_color: "Error"
+                    halign: "center"
+
+        # ------------------- Main -------------------
+        Screen:
+            name: "main_screen"
+            MDScreen:
+                MDBottomNavigation:
+                    id: nav_bar
+                    panel_color: "#F7F5F5"
+                    text_color_active: "#691C32"
+
+                    # ------------------- Recherche -------------------
+                    MDBottomNavigationItem:
+                        name: 'recherche'
+                        icon: 'clipboard-text-clock'
+
+                        MDBoxLayout:
+                            id: container_recherche
+                            orientation: 'vertical'
+                            spacing: dp(10)
+                            padding: dp(10)
+
+                            MDLabel:
+                                text: "Prestations à venir"
+                                font_style: "H5"
+                                bold: True
+                                halign: "center"
+
+                            MDScrollView:
+                                size_hint_y: 0.5
+                                MDBoxLayout:
+                                    id: upcoming_container
+                                    orientation: 'vertical'
+                                    adaptive_height: True
+                                    spacing: dp(10)
+                                    padding: dp(10)
+
+                            MDLabel:
+                                text: "Prestations historiques"
+                                font_style: "H5"
+                                bold: True
+                                halign: "center"
+
+                            MDScrollView:
+                                size_hint_y: 0.5
+                                MDBoxLayout:
+                                    id: history_container
+                                    orientation: 'vertical'
+                                    adaptive_height: True
+                                    spacing: dp(10)
+                                    padding: dp(10)
+
+                    # ------------------- Prestations en cours -------------------
+                    MDBottomNavigationItem:
+                        name: 'prestation_en_cours'
+                        icon: 'clipboard-list-outline'
+
+                        MDScrollView:
+                            MDBoxLayout:
+                                id: container_prestations_type
+                                orientation: 'vertical'
+                                adaptive_height: True
+                                padding: dp(20)
+                                spacing: dp(20)
+
+                                MDLabel:
+                                    text: "Mes prestations en cours"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+
+                                MDSeparator:
+
+                                MDLabel:
+                                    text: "Mes prestations finis"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+
+                    # ------------------- Prestations historiques -------------------
+                    MDBottomNavigationItem:
+                        name: 'prestation_historique'
+                        icon: 'history'
+
+                        MDScrollView:
+                            MDBoxLayout:
+                                id: container_prestations
+                                orientation: 'vertical'
+                                adaptive_height: True
+                                padding: dp(20)
+                                spacing: dp(15)
+
+                    # ------------------- Calendrier -------------------
+                    MDBottomNavigationItem:
+                        name: 'calendar'
+                        icon: 'calendar-range'
+
+                        MDScreen:
+                            md_bg_color: app.theme_cls.bg_normal
+
+                            MDTextField:
+                                id: field
+                                hint_text: "Docked date picker"
+                                helper_text: "MM/DD/YYYY"
+                                helper_text_mode: "persistent"
+                                icon_right: "calendar"
+                                mode: "rectangle"
+                                pos_hint: {'center_x': .5, 'center_y': .85}
+                                size_hint_x: .5
+                                on_focus: if self.focus: app.show_date_picker()
+
+                            MDSeparator:
+
+                            MDRaisedButton:
+                                id: button_calendar
+                                text: "Valider"
+                                pos_hint: {"center_x": 0.5}
+                                on_release: app.valider_dates()
+
+                    # ------------------- Profil -------------------
+                    MDBottomNavigationItem:
+                        name: 'profil'
+                        icon: 'account'
+
+                        MDScrollView:
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                adaptive_height: True
+                                padding: dp(20)
+                                spacing: dp(20)
+
+                                MDBoxLayout:
+                                    orientation: 'vertical'
+                                    spacing: dp(15)
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    padding: dp(10)
+
+                                    MDLabel:
+                                        text: "Profil"
+                                        font_style: "H5"
+                                        bold: True
+                                        halign: "center"
+
+                                    MDLabel:
+                                        id: profil_nom
+                                        text: ""
+                                        font_style: "Body1"
+                                        halign: "center"
+
+                                    MDLabel:
+                                        id: profil_email
+                                        text: ""
+                                        font_style: "Body1"
+                                        halign: "center"
+
+                                    MDLabel:
+                                        id: profil_telephone
+                                        text: "N/A"
+                                        font_style: "Body1"
+                                        halign: "center"
+
+                                MDBoxLayout:
+                                    size_hint_y: None
+                                    height: dp(60)
+                                    MDRaisedButton:
+                                        text: "Changer le mot de passe"
+                                        md_bg_color: (0.41,0.11,0.2,1)
+                                        text_color: 1,1,1,1
+                                        size_hint_x: 1
+                                        on_release: app.show_change_password_screen()
+
+        # ------------------- Changer mot de passe -------------------
+        Screen:
+            name: "change_password_screen"
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: dp(20)
+                spacing: dp(20)
+
+                MDLabel:
+                    text: "Changer le mot de passe"
+                    font_style: "H5"
+                    bold: True
+                    halign: "center"
+
+                MDTextField:
+                    id: current_password
+                    hint_text: "Mot de passe actuel"
+                    password: True
+                    size_hint_y: None
+                    height: dp(60)
+
+                MDTextField:
+                    id: new_password
+                    hint_text: "Nouveau mot de passe"
+                    password: True
+                    size_hint_y: None
+                    height: dp(60)
+
+                MDTextField:
+                    id: confirm_password
+                    hint_text: "Confirmation du nouveau mot de passe"
+                    password: True
+                    size_hint_y: None
+                    height: dp(60)
+
+                MDBoxLayout:
+                    size_hint_y: None
+                    height: dp(60)
+                    spacing: dp(10)
+
+                    MDRaisedButton:
+                        id: valider_mdp
+                        text: "Valider"
+                        md_bg_color: (0.41,0.11,0.2,1)
+                        text_color: 1,1,1,1
+                        on_release: app.valider_mdp()
+                        disabled: True
+
+                    MDRaisedButton:
+                        text: "Retour"
+                        md_bg_color: (0.7,0.7,0.7,1)
+                        text_color: 1,1,1,1
+                        on_release:
+                            app.root.ids.screen_manager.current = "main_screen"
+                            app.root.ids.nav_bar.switch_tab('profil')
