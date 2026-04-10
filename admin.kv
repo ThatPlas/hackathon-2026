@@ -1,0 +1,259 @@
+MDScreen:
+    name: "espace_admin"
+    
+    ScreenManager:
+        id: admin_sm
+        
+        # --- APERÇU RAPIDE & MENU DU BAS ---
+        MDScreen:
+            name: "main_admin"
+            MDBottomNavigation:
+                text_color_active: 0.5, 0, 0.2, 1 
+                
+                MDBottomNavigationItem:
+                    name: 'nav_techs'
+                    text: 'Techniciens'
+                    icon: 'account-group'
+                    on_tab_press: app.charger_tous_les_techniciens()
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        MDRelativeLayout:
+                            size_hint_y: None
+                            height: "80dp"
+                            MDLabel:
+                                text: "Tous les techniciens"
+                                font_style: "H4"
+                                bold: True
+                                x: "20dp"
+                            MDIconButton:
+                                icon: "plus"
+                                pos_hint: {"center_y": .5, "right": 0.95}
+                                on_release: app.aller_vers_admin("ajouter_tech")
+
+                        MDScrollView:
+                            MDList:
+                                id: list_all_techs
+                                padding: "10dp"
+
+                MDBottomNavigationItem:
+                    name: 'nav_apercu'
+                    text: 'Aperçu rapide'
+                    icon: 'folder-outline'
+                    on_tab_press: app.charger_apercu_rapide()
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        MDRelativeLayout:
+                            size_hint_y: None
+                            height: "80dp"
+                            MDLabel:
+                                text: "Aperçu rapide"
+                                font_style: "H4"
+                                bold: True
+                                x: "20dp"
+
+                        MDScrollView:
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                adaptive_height: True
+                                padding: "20dp"
+                                spacing: "20dp"
+                                
+                                MDLabel:
+                                    text: "5 derniers techniciens"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+                                MDList:
+                                    id: list_last_techs
+                                    
+                                MDLabel:
+                                    text: "Prestations en attente"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+                                MDList:
+                                    id: list_attente
+                                    
+                                MDLabel:
+                                    text: "Prestations confirmées"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+                                MDList:
+                                    id: list_confirmees
+                                    
+                                MDLabel:
+                                    text: "Prestations terminées"
+                                    font_style: "H6"
+                                    bold: True
+                                    adaptive_height: True
+                                MDList:
+                                    id: list_terminees
+
+        # --- DÉTAILS PRESTATION ---
+        MDScreen:
+            name: "detail_presta"
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: "20dp"
+                spacing: "10dp"
+                
+                MDIconButton:
+                    icon: "arrow-left"
+                    on_release: app.aller_vers_admin("main_admin")
+                    
+                MDLabel:
+                    id: dp_titre
+                    text: "Prestation n°..."
+                    font_style: "H4"
+                    bold: True
+                    adaptive_height: True
+                
+                MDLabel:
+                    id: dp_status
+                    text: "Status..."
+                    markup: True
+                    adaptive_height: True
+                    
+                MDLabel:
+                    id: dp_client
+                    text: "Client : ..."
+                    adaptive_height: True
+                    
+                MDLabel:
+                    id: dp_dates
+                    text: "Dates : ..."
+                    adaptive_height: True
+                    
+                MDLabel:
+                    id: dp_adresse
+                    text: "Adresse : ..."
+                    adaptive_height: True
+                    
+                Widget: 
+                
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: "20dp"
+                    MDRaisedButton:
+                        id: btn_assigner
+                        text: "Assigner un technicien"
+                        md_bg_color: 0.2, 0.5, 0.8, 1
+                        on_release: app.ouvrir_assignation()
+                    
+                    MDRaisedButton:
+                        id: btn_accepter
+                        text: "Accepter"
+                        md_bg_color: 0.1, 0.6, 0.1, 1
+
+        # --- DÉTAILS TECHNICIEN ---
+        MDScreen:
+            name: "detail_tech"
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: "20dp"
+                spacing: "15dp"
+                
+                MDIconButton:
+                    icon: "arrow-left"
+                    on_release: app.aller_vers_admin("main_admin")
+                    
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: "20dp"
+                    MDIcon:
+                        icon: "account-circle"
+                        font_size: "80dp"
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        MDLabel:
+                            id: dt_nom
+                            text: "Nom du tech"
+                            font_style: "H4"
+                            bold: True
+                        MDLabel:
+                            id: dt_email
+                            text: "Email"
+                            
+                MDLabel:
+                    text: "Dernières prestations"
+                    font_style: "H6"
+                    bold: True
+                    adaptive_height: True
+                    
+                MDScrollView:
+                    MDList:
+                        id: dt_list_prestas
+
+        # --- AJOUTER TECHNICIEN ---
+        MDScreen:
+            name: "ajouter_tech"
+            MDBoxLayout:
+                orientation: 'vertical'
+                padding: "20dp"
+                spacing: "15dp"
+                
+                MDRelativeLayout:
+                    size_hint_y: None
+                    height: "60dp"
+                    MDIconButton:
+                        icon: "arrow-left"
+                        pos_hint: {"center_y": .5}
+                        on_release: app.aller_vers_admin("main_admin")
+                    MDLabel:
+                        text: "Ajouter un technicien"
+                        font_style: "H5"
+                        bold: True
+                        pos_hint: {"center_y": .5}
+                        x: "50dp"
+
+                MDTextField:
+                    id: input_nom
+                    hint_text: "Nom"
+                MDTextField:
+                    id: input_prenom
+                    hint_text: "Prénom"
+                MDTextField:
+                    id: input_email
+                    hint_text: "Adresse e-mail"
+                MDTextField:
+                    id: input_tel
+                    hint_text: "Téléphone"
+                MDTextField:
+                    id: input_mdp
+                    hint_text: "Mot de passe provisoire"
+                    password: True
+                    
+                Widget:
+                
+                MDRaisedButton:
+                    text: "Enregistrer"
+                    pos_hint: {"center_x": .5}
+                    md_bg_color: 0.1, 0.6, 0.1, 1
+                    on_release: app.sauvegarder_technicien()
+
+        # --- ASSIGNER TECHNICIEN ---
+        MDScreen:
+            name: "assigner_tech"
+            MDBoxLayout:
+                orientation: 'vertical'
+                
+                MDRelativeLayout:
+                    size_hint_y: None
+                    height: "60dp"
+                    MDIconButton:
+                        icon: "arrow-left"
+                        pos_hint: {"center_y": .5}
+                        on_release: app.aller_vers_admin("detail_presta")
+                    MDLabel:
+                        text: "Sélectionner un technicien"
+                        font_style: "H5"
+                        bold: True
+                        pos_hint: {"center_y": .5}
+                        x: "50dp"
+                        
+                MDScrollView:
+                    MDList:
+                        id: list_techs_dispo
