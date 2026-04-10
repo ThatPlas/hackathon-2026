@@ -7,6 +7,7 @@ def get_connection():
         host="localhost",
         user="root",
         password="",
+        password="",
         database="conciergerie_desruelle"
     )
 
@@ -162,7 +163,7 @@ def get_prestations_by_user(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT p.*, GROUP_CONCAT(tp.nom_type_presta) AS types_presta
+        SELECT p.*, GROUP_CONCAT(tp.nom) AS types_presta
         FROM presta p
         JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
         JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
@@ -413,15 +414,33 @@ def get_presta_details(presta_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
+        SELECT p.*, c.nom as client_nom, c.prenom as client_prenom,
+               tp.nom,
+               tech_u.prenom as tech_prenom, tech_u.nom as tech_nom
         SELECT p.*, u.nom as client_nom, u.prenom as client_prenom 
         FROM prestation p
+        LEFT JOIN user c ON p.id_user = c.id_user
+        LEFT JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        LEFT JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        LEFT JOIN disponibilite d ON p.id_presta = d.id_presta
+        LEFT JOIN user tech_u ON d.id_user = tech_u.id_user
         JOIN user u ON p.id_user = u.id_user
         WHERE p.id_presta = %s
     """, (presta_id,))
+    prestas = cursor.fetchall()
     res = cursor.fetchone()
     cursor.close()
     conn.close()
-    return res
+    return prestas[0] if prestas else None
+
+def get_tech_details(tech_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM user WHERE id_user = %s", (tech_id,))
+    tech = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return tech
 
 def add_technicien(nom, prenom, email, tel, mdp):
     conn = get_connection()
@@ -438,3 +457,66 @@ def add_technicien(nom, prenom, email, tel, mdp):
     finally:
         cursor.close()
         conn.close()
+
+def refuser_prestation(presta_id):
+    """Passe le status d'une prestation à Annulée"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE prestation SET status = 'Annulée' WHERE id_presta = %s", (presta_id,))
+        conn.commit()
+    except Exception as e:
+        print(f"Erreur lors du refus de la prestation : {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+def assign_tech_to_presta(id_presta, id_tech):
+    """Associe un technicien à une prestation et la passe en Confirmée"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Insertion dans la table de liaison DISPONIBILITE (selon le MCD)
+        cursor.execute("INSERT INTO disponibilite (id_user, id_presta) VALUES (%s, %s)", (id_tech, id_presta))
+        
+        # On passe le statut à "Confirmée" si elle était "En attente"
+        cursor.execute("UPDATE prestation SET status = 'Confirmée' WHERE id_presta = %s AND status = 'En attente'", (id_presta,))
+        conn.commit()
+    except Exception as e:
+        print(f"Erreur d'assignation : {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_tech_latest_prestas(id_tech):
+    """Récupère les 5 dernières prestations d'un technicien"""
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.id_presta, p.adresse, p.status
+        FROM prestation p
+        INNER JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s
+        ORDER BY p.id_presta DESC LIMIT 5
+    """, (id_tech,))
+    prestas = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return prestas
+
+def get_tech_prestas_with_dates(id_tech):
+    """Récupère toutes les prestations d'un technicien avec leurs dates pour le calendrier"""
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.id_presta, p.debut_contrat, p.fin_contrat, p.status, p.adresse
+        FROM prestation p
+        INNER JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s
+        ORDER BY p.debut_contrat
+    """, (id_tech,))
+    prestas = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return prestas
+
