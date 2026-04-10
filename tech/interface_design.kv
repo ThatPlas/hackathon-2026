@@ -7,33 +7,31 @@ BoxLayout:
     ScreenManager:
         id: screen_manager
 
+        # --- LOGIN ---
         Screen:
             name: "login_screen"
             MDBoxLayout:
                 orientation: "vertical"
                 padding: dp(20)
                 spacing: dp(20)
-
                 MDTextField:
                     id: login_email
                     hint_text: "Email"
-
                 MDTextField:
                     id: login_password
                     hint_text: "Mot de passe"
                     password: True
-
                 MDRaisedButton:
                     text: "Se connecter"
                     pos_hint: {"center_x": 0.5}
                     on_release: app.tenter_connexion(login_email.text, login_password.text)
-
                 MDLabel:
                     id: login_msg
                     text: ""
                     theme_text_color: "Error"
                     halign: "center"
 
+        # --- MAIN ---
         Screen:
             name: "main_screen"
             MDScreen:
@@ -42,21 +40,20 @@ BoxLayout:
                     id: nav_bar
                     panel_color: "#F7F5F5"
                     text_color_active: "#691C32"
-
+                    
                     MDBottomNavigationItem:
                         name: 'recherche'
                         icon: 'clipboard-text-clock'
                         MDBoxLayout:
                             orientation: 'vertical'
-                            spacing: dp(6)
                             padding: dp(10)
+                            spacing: dp(6)
                             MDCard:
                                 md_bg_color: "#691C32"
-                                radius: [10]
                                 size_hint_y: None
                                 height: dp(36)
                                 MDLabel:
-                                    text: "Prestations à venir"
+                                    text: "À venir"
                                     halign: "center"
                                     theme_text_color: "Custom"
                                     text_color: 1,1,1,1
@@ -66,10 +63,8 @@ BoxLayout:
                                     orientation: 'vertical'
                                     adaptive_height: True
                                     spacing: dp(6)
-                                    padding: dp(6)
                             MDCard:
                                 md_bg_color: "#691C32"
-                                radius: [10]
                                 size_hint_y: None
                                 height: dp(36)
                                 MDLabel:
@@ -83,7 +78,6 @@ BoxLayout:
                                     orientation: 'vertical'
                                     adaptive_height: True
                                     spacing: dp(6)
-                                    padding: dp(6)
 
                     MDBottomNavigationItem:
                         name: 'prestation_en_cours'
@@ -94,7 +88,6 @@ BoxLayout:
                             spacing: dp(6)
                             MDCard:
                                 md_bg_color: "#691C32"
-                                radius: [10]
                                 size_hint_y: None
                                 height: dp(36)
                                 MDLabel:
@@ -108,7 +101,6 @@ BoxLayout:
                                     orientation: "vertical"
                                     adaptive_height: True
                                     spacing: dp(6)
-                                    padding: dp(6)
 
                     MDBottomNavigationItem:
                         name: 'calendar'
@@ -116,9 +108,8 @@ BoxLayout:
                         MDScreen:
                             MDTextField:
                                 id: field
-                                hint_text: "Docked date picker"
-                                icon_right: "calendar"
-                                pos_hint: {'center_x': .5, 'center_y': .85}
+                                hint_text: "Choisir dates"
+                                pos_hint: {'center_x': .5, 'center_y': .8}
                                 size_hint_x: .6
                                 on_focus: if self.focus: app.show_date_picker()
 
@@ -128,149 +119,209 @@ BoxLayout:
                         MDBoxLayout:
                             orientation: 'vertical'
                             padding: dp(20)
-                            spacing: dp(15)
+                            spacing: dp(10)
                             MDLabel:
                                 id: profil_nom
-                                text: "Nom"
                                 halign: "center"
                             MDLabel:
                                 id: profil_email
-                                text: "Email"
                                 halign: "center"
                             MDRaisedButton:
                                 text: "Changer le mot de passe"
                                 pos_hint: {"center_x": 0.5}
                                 on_release: app.show_change_password_screen()
 
+        # --- DETAIL : EN COURS ---
         Screen:
-            name: "detail_screen"
+            name: "detail_en_cours"
             MDBoxLayout:
                 orientation: "vertical"
-                md_bg_color: 1, 1, 1, 1
-                
+                md_bg_color: 1,1,1,1
                 ScrollView:
                     MDBoxLayout:
                         orientation: "vertical"
-                        padding: dp(20)
-                        spacing: dp(12)
+                        padding: [dp(25), dp(20), dp(25), dp(20)]
+                        spacing: dp(15)
                         adaptive_height: True
-
-                        # HEADER
                         MDLabel:
-                            id: detail_title
-                            text: "Prestation n°--"
+                            id: ec_title
                             font_style: "H5"
                             bold: True
-                        
+                            adaptive_height: True
                         MDBoxLayout:
                             adaptive_height: True
                             spacing: dp(10)
                             MDLabel:
-                                id: detail_subtitle
-                                text: "Titre"
+                                id: ec_subtitle
                                 font_style: "Subtitle1"
                                 adaptive_width: True
                             MDLabel:
-                                id: detail_status
-                                text: "(Status)"
+                                text: "(En cours)"
+                                font_style: "Subtitle1"
                                 theme_text_color: "Custom"
-                                text_color: 0.2, 0.3, 1, 1
+                                text_color: 0.2, 0.4, 0.9, 1
                                 bold: True
-
-                        # SECTIONS
-                        MDLabel:
-                            text: "👤 Client"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_client
-                            text: ""
-                            bold: True
-
-                        MDLabel:
-                            text: "🛠 Technicien"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_technicien
-                            text: ""
-                            bold: True
-
-                        MDLabel:
-                            text: "📋 Prestation"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_prestation
-                            text: ""
-                            bold: True
-
                         MDBoxLayout:
-                            spacing: dp(20)
-                            size_hint_y: None
-                            height: dp(50)
+                            orientation: "vertical"
+                            adaptive_height: True
+                            spacing: dp(12)
                             MDBoxLayout:
                                 orientation: "vertical"
+                                adaptive_height: True
                                 MDLabel:
-                                    text: "🕒 Date début"
-                                    font_style: "Caption"
+                                    text: "👤 Client"
                                     theme_text_color: "Hint"
+                                    font_style: "Caption"
                                 MDLabel:
-                                    id: detail_date_debut
-                                    text: ""
+                                    id: ec_client
                                     bold: True
                             MDBoxLayout:
                                 orientation: "vertical"
+                                adaptive_height: True
                                 MDLabel:
-                                    text: "🕒 Date fin"
-                                    font_style: "Caption"
+                                    text: "🛠 Technicien"
                                     theme_text_color: "Hint"
+                                    font_style: "Caption"
                                 MDLabel:
-                                    id: detail_date_fin
-                                    text: ""
-                                    theme_text_color: "Custom"
-                                    text_color: 0.7, 0, 0, 1
-                                    underline: True
-
-                        MDLabel:
-                            text: "📍 Adresse"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_adresse
-                            text: ""
-                            bold: True
-
-                        MDLabel:
-                            text: "📍 Complément"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_complement
-                            text: ""
-
-                        MDLabel:
-                            text: "📝 Infos supplémentaires"
-                            theme_text_color: "Hint"
-                            font_style: "Caption"
-                        MDLabel:
-                            id: detail_infos
-                            text: ""
-                            adaptive_height: True
-
+                                    id: ec_technicien
+                                    bold: True
+                            MDBoxLayout:
+                                adaptive_height: True
+                                spacing: dp(20)
+                                MDBoxLayout:
+                                    orientation: "vertical"
+                                    adaptive_height: True
+                                    MDLabel:
+                                        text: "🕒 Date début"
+                                        theme_text_color: "Hint"
+                                        font_style: "Caption"
+                                    MDLabel:
+                                        id: ec_date_debut
+                                        bold: True
+                                MDBoxLayout:
+                                    orientation: "vertical"
+                                    adaptive_height: True
+                                    MDLabel:
+                                        text: "🕒 Date fin"
+                                        theme_text_color: "Hint"
+                                        font_style: "Caption"
+                                    MDLabel:
+                                        id: ec_date_fin
+                                        bold: True
+                                        theme_text_color: "Custom"
+                                        text_color: 0.8, 0, 0, 1
+                                        underline: True
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                adaptive_height: True
+                                MDLabel:
+                                    text: "📍 Adresse"
+                                    theme_text_color: "Hint"
+                                    font_style: "Caption"
+                                MDLabel:
+                                    id: ec_adresse
+                                    bold: True
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                adaptive_height: True
+                                MDLabel:
+                                    text: "📍 Complément"
+                                    theme_text_color: "Hint"
+                                    font_style: "Caption"
+                                MDLabel:
+                                    id: ec_complement
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                adaptive_height: True
+                                MDLabel:
+                                    text: "📝 Infos supplémentaires"
+                                    theme_text_color: "Hint"
+                                    font_style: "Caption"
+                                MDLabel:
+                                    id: ec_infos
+                                    adaptive_height: True
+                        Widget:
+                            size_hint_y: None
+                            height: dp(20)
                         MDRaisedButton:
-                            id: btn_retour
                             text: "Ajouter un retour"
                             pos_hint: {"center_x": 0.5}
+                            size_hint_x: 0.9
                             md_bg_color: 0.9, 0.9, 0.9, 1
                             text_color: 0, 0, 0, 1
                             on_release: app.go_to_feedback_form()
-
                         MDRaisedButton:
                             text: "Retour"
                             pos_hint: {"center_x": 0.5}
+                            size_hint_x: 0.9
+                            md_bg_color: "#691C32"
                             on_release: screen_manager.current = "main_screen"
 
+        # --- DETAIL : A VENIR ---
+        Screen:
+            name: "detail_a_venir"
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: dp(20)
+                spacing: dp(10)
+                MDLabel:
+                    id: av_title
+                    font_style: "H5"
+                    bold: True
+                    adaptive_height: True
+                MDLabel:
+                    id: av_subtitle
+                    adaptive_height: True
+                MDLabel:
+                    id: av_client
+                    adaptive_height: True
+                MDLabel:
+                    id: av_technicien
+                    adaptive_height: True
+                MDLabel:
+                    id: av_adresse
+                    adaptive_height: True
+                MDLabel:
+                    id: av_infos
+                    adaptive_height: True
+                MDRaisedButton:
+                    text: "Retour"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: screen_manager.current = "main_screen"
+
+        # --- DETAIL : HISTORIQUE ---
+        Screen:
+            name: "detail_historique"
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: dp(20)
+                spacing: dp(10)
+                MDLabel:
+                    id: hi_title
+                    font_style: "H5"
+                    bold: True
+                    adaptive_height: True
+                MDLabel:
+                    id: hi_subtitle
+                    adaptive_height: True
+                MDLabel:
+                    id: hi_client
+                    adaptive_height: True
+                MDLabel:
+                    id: hi_technicien
+                    adaptive_height: True
+                MDLabel:
+                    id: hi_adresse
+                    adaptive_height: True
+                MDLabel:
+                    id: hi_infos
+                    adaptive_height: True
+                MDRaisedButton:
+                    text: "Retour"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: screen_manager.current = "main_screen"
+
+        # --- FEEDBACK ---
         Screen:
             name: "feedback_screen"
             MDBoxLayout:
@@ -278,26 +329,20 @@ BoxLayout:
                 padding: dp(20)
                 spacing: dp(15)
                 MDLabel:
-                    text: "Ajouter un retour"
+                    text: "Feedback"
                     halign: "center"
-                    font_style: "H5"
-                MDRaisedButton:
-                    text: "Ajouter média"
-                    pos_hint: {"center_x": .5}
-                    on_release: app.add_media()
                 MDTextField:
                     id: feedback_description
                     hint_text: "Description"
                     multiline: True
                 MDRaisedButton:
                     text: "Valider"
-                    pos_hint: {"center_x": .5}
                     on_release: app.submit_feedback()
                 MDRaisedButton:
                     text: "Annuler"
-                    pos_hint: {"center_x": .5}
                     on_release: app.cancel_feedback()
 
+        # --- PASSWORD ---
         Screen:
             name: "change_password_screen"
             MDBoxLayout:
@@ -306,19 +351,18 @@ BoxLayout:
                 spacing: dp(20)
                 MDTextField:
                     id: current_password
-                    hint_text: "Mot de passe actuel"
+                    hint_text: "Actuel"
                     password: True
                 MDTextField:
                     id: new_password
-                    hint_text: "Nouveau mot de passe"
+                    hint_text: "Nouveau"
                     password: True
                 MDTextField:
                     id: confirm_password
-                    hint_text: "Confirmation"
+                    hint_text: "Confirmer"
                     password: True
                 MDRaisedButton:
                     id: valider_mdp
                     text: "Valider"
-                    pos_hint: {"center_x": .5}
-                    on_release: app.valider_mdp()
                     disabled: True
+                    on_release: app.valider_mdp()
