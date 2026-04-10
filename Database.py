@@ -428,3 +428,35 @@ def get_tech_prestas_with_dates(id_tech):
     conn.close()
     return prestas
 
+def get_prestations_by_status_for_tech(id_tech, status):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom, tp.nom as type_nom
+        FROM prestation p
+        JOIN user u ON p.id_user = u.id_user
+        JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
+        JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
+        JOIN disponibilite d ON p.id_presta = d.id_presta
+        WHERE d.id_user = %s AND p.status = %s
+        ORDER BY p.debut_contrat DESC
+    """, (id_tech, status))
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
+def add_presta_feedback(id_presta, commentaire):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO retour_presta (id_presta, commentaire) VALUES (%s, %s)", (id_presta, commentaire))
+        cursor.execute("UPDATE prestation SET status = 'Terminée' WHERE id_presta = %s", (id_presta,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Erreur lors de l'ajout du retour : {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
