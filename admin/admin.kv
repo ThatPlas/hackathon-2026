@@ -1,0 +1,520 @@
+ScreenManager:
+    id: screen_manager
+    
+    # ---------------------------------------------------
+    # APERÇU RAPIDE & MENU DU BAS
+    # ---------------------------------------------------
+    MDScreen:
+        name: "main_admin"
+        
+        MDBottomNavigation:
+            text_color_active: 0.5, 0, 0.2, 1 
+            
+            # 1. Onglet Techniciens (Toute la liste)
+            MDBottomNavigationItem:
+                name: 'nav_techs'
+                text: 'Techniciens'
+                icon: 'account-group'
+                on_tab_press: app.charger_tous_les_techniciens()
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDRelativeLayout:
+                        size_hint_y: None
+                        height: "80dp"
+                        MDLabel:
+                            text: "Tous les techniciens"
+                            font_style: "H4"
+                            bold: True
+                            x: "20dp"
+                        # BOUTON POUR AJOUTER UN TECHNICIEN
+                        MDIconButton:
+                            icon: "plus"
+                            pos_hint: {"center_y": .5, "right": 0.95}
+                            on_release: app.root.current = "ajouter_tech"
+
+                    MDScrollView:
+                        MDList:
+                            id: list_all_techs
+                            padding: "10dp"
+
+            # 2. Onglet Aperçu rapide (Les 5 derniers)
+            MDBottomNavigationItem:
+                name: 'nav_apercu'
+                text: 'Aperçu rapide'
+                icon: 'folder-outline'
+                on_tab_press: app.charger_apercu_rapide()
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDRelativeLayout:
+                        size_hint_y: None
+                        height: "80dp"
+                        MDLabel:
+                            text: "Aperçu rapide"
+                            font_style: "H4"
+                            bold: True
+                            x: "20dp"
+
+                    MDScrollView:
+                        MDBoxLayout:
+                            orientation: 'vertical'
+                            adaptive_height: True
+                            padding: "20dp"
+                            spacing: "20dp"
+                            
+                            MDLabel:
+                                text: "5 derniers techniciens"
+                                font_style: "H6"
+                                bold: True
+                                adaptive_height: True
+                            MDList:
+                                id: list_last_techs
+                                
+                            MDLabel:
+                                text: "Prestations en attente"
+                                font_style: "H6"
+                                bold: True
+                                adaptive_height: True
+                            MDList:
+                                id: list_attente
+                                
+                            MDLabel:
+                                text: "Prestations confirmées"
+                                font_style: "H6"
+                                bold: True
+                                adaptive_height: True
+                            MDList:
+                                id: list_confirmees
+                                
+                            MDLabel:
+                                text: "Prestations terminées"
+                                font_style: "H6"
+                                bold: True
+                                adaptive_height: True
+                            MDList:
+                                id: list_terminees
+
+                            MDLabel:
+                                text: "Prestations annulées"
+                                font_style: "H6"
+                                bold: True
+                                adaptive_height: True
+                            MDList:
+                                id: list_annulees
+
+    # ---------------------------------------------------
+    # DÉTAILS PRESTATION
+    # ---------------------------------------------------
+    MDScreen:
+        name: "detail_presta"
+        MDBoxLayout:
+            orientation: 'vertical'
+
+            # Barre du haut
+            MDBoxLayout:
+                size_hint_y: None
+                height: "56dp"
+                padding: "4dp"
+                MDIconButton:
+                    icon: "arrow-left"
+                    pos_hint: {"center_y": .5}
+                    on_release: app.root.current = "main_admin"
+                MDLabel:
+                    id: dp_header
+                    text: "Détails prestation"
+                    font_style: "H6"
+                    bold: True
+                    pos_hint: {"center_y": .5}
+
+            MDScrollView:
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: "20dp"
+                    spacing: "6dp"
+
+                    # Titre + Status
+                    MDLabel:
+                        id: dp_titre
+                        text: "Prestation n°..."
+                        font_style: "H4"
+                        bold: True
+                        adaptive_height: True
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: "10dp"
+                        MDLabel:
+                            id: dp_type_presta
+                            text: ""
+                            adaptive_height: True
+                        MDLabel:
+                            id: dp_status
+                            text: ""
+                            markup: True
+                            adaptive_height: True
+
+                    # Séparateur
+                    MDSeparator:
+                        height: "1dp"
+
+                    # Client
+                    MDLabel:
+                        text: "Client"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_client
+                        text: "..."
+                        font_style: "H6"
+                        adaptive_height: True
+
+                    # Technicien
+                    MDLabel:
+                        text: "Technicien"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_technicien
+                        text: "Assigner un technicien"
+                        markup: True
+                        adaptive_height: True
+                        on_touch_down: if self.collide_point(*args[1].pos): app.ouvrir_assignation()
+
+                    # Type de prestation
+                    MDLabel:
+                        text: "Prestation"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_type_detail
+                        text: "..."
+                        adaptive_height: True
+
+                    # Dates
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: "20dp"
+                        MDBoxLayout:
+                            orientation: 'vertical'
+                            adaptive_height: True
+                            MDLabel:
+                                text: "Date et heure début"
+                                font_size: "12sp"
+                                theme_text_color: "Secondary"
+                                adaptive_height: True
+                            MDLabel:
+                                id: dp_date_debut
+                                text: "..."
+                                adaptive_height: True
+                        MDBoxLayout:
+                            orientation: 'vertical'
+                            adaptive_height: True
+                            MDLabel:
+                                text: "Date et heure fin"
+                                font_size: "12sp"
+                                theme_text_color: "Secondary"
+                                adaptive_height: True
+                            MDLabel:
+                                id: dp_date_fin
+                                text: "..."
+                                adaptive_height: True
+
+                    # Adresse
+                    MDLabel:
+                        text: "Adresse"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_adresse
+                        text: "..."
+                        adaptive_height: True
+
+                    # Complément d'adresse
+                    MDLabel:
+                        text: "Complément d'adresse"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_complement
+                        text: "..."
+                        adaptive_height: True
+
+                    # Infos supplémentaires
+                    MDLabel:
+                        text: "Infos supplémentaires"
+                        font_size: "12sp"
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDLabel:
+                        id: dp_infos
+                        text: "..."
+                        adaptive_height: True
+
+                    # Total
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: "10dp"
+                        padding: [0, "10dp", 0, 0]
+                        MDIcon:
+                            icon: "currency-eur"
+                            font_size: "20sp"
+                        MDLabel:
+                            text: "Total"
+                            font_size: "12sp"
+                            theme_text_color: "Secondary"
+                            adaptive_height: True
+                    MDLabel:
+                        id: dp_prix
+                        text: "0,00€"
+                        font_style: "H5"
+                        bold: True
+                        adaptive_height: True
+
+            # Boutons en bas
+            MDBoxLayout:
+                size_hint_y: None
+                height: "60dp"
+                padding: "20dp", "10dp"
+                spacing: "20dp"
+
+                MDRaisedButton:
+                    id: btn_refuser
+                    text: "Refuser"
+                    md_bg_color: 0.9, 0.9, 0.9, 1
+                    text_color: 0, 0, 0, 1
+                    size_hint_x: 1
+                    on_release: app.refuser_prestation()
+
+                MDRaisedButton:
+                    id: btn_accepter
+                    text: "Accepter"
+                    md_bg_color: 0.9, 0.9, 0.9, 1
+                    text_color: 0, 0, 0, 1
+                    size_hint_x: 1
+                    on_release: app.accepter_prestation()
+
+    # ---------------------------------------------------
+    # DÉTAILS TECHNICIEN
+    # ---------------------------------------------------
+    MDScreen:
+        name: "detail_tech"
+        MDBoxLayout:
+            orientation: 'vertical'
+
+            # Barre du haut
+            MDBoxLayout:
+                size_hint_y: None
+                height: "56dp"
+                padding: "4dp"
+                MDIconButton:
+                    icon: "arrow-left"
+                    pos_hint: {"center_y": .5}
+                    on_release: app.root.current = "main_admin"
+                MDLabel:
+                    text: "Détails technicien"
+                    font_style: "H6"
+                    bold: True
+                    pos_hint: {"center_y": .5}
+
+            MDScrollView:
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    padding: "20dp"
+                    spacing: "15dp"
+
+                    # Info technicien
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: "20dp"
+                        MDIcon:
+                            icon: "account-circle"
+                            font_size: "80dp"
+                        MDBoxLayout:
+                            orientation: 'vertical'
+                            adaptive_height: True
+                            MDLabel:
+                                id: dt_nom
+                                text: "Nom du tech"
+                                font_style: "H4"
+                                bold: True
+                                adaptive_height: True
+                            MDLabel:
+                                id: dt_email
+                                text: "Email"
+                                adaptive_height: True
+                            MDLabel:
+                                id: dt_tel
+                                text: ""
+                                adaptive_height: True
+
+                    MDSeparator:
+                        height: "1dp"
+
+                    # Calendrier de disponibilités
+                    MDLabel:
+                        text: "Calendrier des disponibilités"
+                        font_style: "H6"
+                        bold: True
+                        adaptive_height: True
+
+                    MDBoxLayout:
+                        id: dt_calendar_nav
+                        adaptive_height: True
+                        spacing: "10dp"
+                        MDIconButton:
+                            icon: "chevron-left"
+                            on_release: app.calendrier_mois_precedent()
+                        MDLabel:
+                            id: dt_calendar_titre
+                            text: "Mois Année"
+                            halign: "center"
+                            font_style: "H6"
+                            adaptive_height: True
+                        MDIconButton:
+                            icon: "chevron-right"
+                            on_release: app.calendrier_mois_suivant()
+
+                    # Grille du calendrier (remplie dynamiquement)
+                    MDGridLayout:
+                        id: dt_calendar_grid
+                        cols: 7
+                        adaptive_height: True
+                        spacing: "2dp"
+
+                    # Légende
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: "20dp"
+                        padding: [0, "5dp", 0, "10dp"]
+                        MDBoxLayout:
+                            adaptive_height: True
+                            spacing: "5dp"
+                            size_hint_x: None
+                            width: "120dp"
+                            Widget:
+                                size_hint: None, None
+                                size: "14dp", "14dp"
+                                canvas:
+                                    Color:
+                                        rgba: 0.8, 0.2, 0.2, 1
+                                    Rectangle:
+                                        pos: self.pos
+                                        size: self.size
+                            MDLabel:
+                                text: "Occupé"
+                                font_size: "12sp"
+                                adaptive_height: True
+                        MDBoxLayout:
+                            adaptive_height: True
+                            spacing: "5dp"
+                            size_hint_x: None
+                            width: "120dp"
+                            Widget:
+                                size_hint: None, None
+                                size: "14dp", "14dp"
+                                canvas:
+                                    Color:
+                                        rgba: 0.2, 0.7, 0.2, 1
+                                    Rectangle:
+                                        pos: self.pos
+                                        size: self.size
+                            MDLabel:
+                                text: "Disponible"
+                                font_size: "12sp"
+                                adaptive_height: True
+
+                    MDSeparator:
+                        height: "1dp"
+
+                    # Dernières prestations
+                    MDLabel:
+                        text: "Dernières prestations"
+                        font_style: "H6"
+                        bold: True
+                        adaptive_height: True
+
+                    MDList:
+                        id: dt_list_prestas
+
+    # ---------------------------------------------------
+    # AJOUTER TECHNICIEN (Formulaire)
+    # ---------------------------------------------------
+    MDScreen:
+        name: "ajouter_tech"
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: "20dp"
+            spacing: "15dp"
+            
+            MDRelativeLayout:
+                size_hint_y: None
+                height: "60dp"
+                MDIconButton:
+                    icon: "arrow-left"
+                    pos_hint: {"center_y": .5}
+                    on_release: app.root.current = "main_admin"
+                MDLabel:
+                    text: "Ajouter un technicien"
+                    font_style: "H5"
+                    bold: True
+                    pos_hint: {"center_y": .5}
+                    x: "50dp"
+
+            MDTextField:
+                id: input_nom
+                hint_text: "Nom"
+            MDTextField:
+                id: input_prenom
+                hint_text: "Prénom"
+            MDTextField:
+                id: input_email
+                hint_text: "Adresse e-mail"
+            MDTextField:
+                id: input_tel
+                hint_text: "Téléphone"
+            MDTextField:
+                id: input_mdp
+                hint_text: "Mot de passe provisoire"
+                password: True
+                
+            Widget:
+            
+            MDRaisedButton:
+                text: "Enregistrer"
+                pos_hint: {"center_x": .5}
+                md_bg_color: 0.1, 0.6, 0.1, 1
+                on_release: app.sauvegarder_technicien()
+
+    # ---------------------------------------------------
+    # ASSIGNER TECHNICIEN (Liste de sélection)
+    # ---------------------------------------------------
+    MDScreen:
+        name: "assigner_tech"
+        MDBoxLayout:
+            orientation: 'vertical'
+            
+            MDRelativeLayout:
+                size_hint_y: None
+                height: "60dp"
+                MDIconButton:
+                    icon: "arrow-left"
+                    pos_hint: {"center_y": .5}
+                    on_release: app.root.current = "detail_presta"
+                MDLabel:
+                    text: "Sélectionner un technicien"
+                    font_style: "H5"
+                    bold: True
+                    pos_hint: {"center_y": .5}
+                    x: "50dp"
+                    
+            MDScrollView:
+                MDList:
+                    id: list_techs_dispo
