@@ -292,78 +292,6 @@ def get_user_role(user_id):
         cursor.close()
         conn.close()
 
-    def get_last_5_techs():
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT u.* FROM user u
-            JOIN technicien t ON u.id_user = t.id_user
-            ORDER BY u.id_user DESC LIMIT 5
-        """)
-        res = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return res
-
-def get_last_5_prestas_by_status(status):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom 
-        FROM prestation p
-        JOIN user u ON p.id_user = u.id_user
-        WHERE p.status = %s
-        ORDER BY p.id_presta DESC LIMIT 5
-    """, (status,))
-    res = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return res
-
-def get_tech_latest_prestas(tech_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.id_presta, p.status, p.adresse 
-        FROM prestation p
-        JOIN disponibilite d ON p.id_presta = d.id_presta
-        WHERE d.id_user = %s
-        ORDER BY p.id_presta DESC LIMIT 10
-    """, (tech_id,))
-    res = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return res
-
-def get_presta_details(presta_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom 
-        FROM prestation p
-        JOIN user u ON p.id_user = u.id_user
-        WHERE p.id_presta = %s
-    """, (presta_id,))
-    res = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return res
-
-def add_technicien(nom, prenom, email, tel, mdp):
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("INSERT INTO user (nom, prenom, email, telephone, mdp) VALUES (%s, %s, %s, %s, %s)",
-                       (nom, prenom, email, tel, mdp))
-        nouvel_id = cursor.lastrowid
-        cursor.execute("INSERT INTO technicien (id_user) VALUES (%s)", (nouvel_id,))
-        conn.commit()
-        return True
-    except:
-        return False
-    finally:
-        cursor.close()
-        conn.close()
 def get_last_5_techs():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -392,21 +320,6 @@ def get_last_5_prestas_by_status(status):
     conn.close()
     return res
 
-def get_tech_latest_prestas(tech_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT p.id_presta, p.status, p.adresse 
-        FROM prestation p
-        JOIN disponibilite d ON p.id_presta = d.id_presta
-        WHERE d.id_user = %s
-        ORDER BY p.id_presta DESC LIMIT 10
-    """, (tech_id,))
-    res = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return res
-
 def get_presta_details(presta_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -414,18 +327,15 @@ def get_presta_details(presta_id):
         SELECT p.*, c.nom as client_nom, c.prenom as client_prenom,
                tp.nom,
                tech_u.prenom as tech_prenom, tech_u.nom as tech_nom
-        SELECT p.*, u.nom as client_nom, u.prenom as client_prenom 
         FROM prestation p
         LEFT JOIN user c ON p.id_user = c.id_user
         LEFT JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
         LEFT JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
         LEFT JOIN disponibilite d ON p.id_presta = d.id_presta
         LEFT JOIN user tech_u ON d.id_user = tech_u.id_user
-        JOIN user u ON p.id_user = u.id_user
         WHERE p.id_presta = %s
     """, (presta_id,))
     prestas = cursor.fetchall()
-    res = cursor.fetchone()
     cursor.close()
     conn.close()
     return prestas[0] if prestas else None
