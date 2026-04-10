@@ -1,0 +1,126 @@
+<AvisScreen>:
+    name: 'avis'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1 # Fond blanc
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # --- BARRE DU HAUT (Header) ---
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            Button:
+                text: "<"
+                font_size: '24sp'
+                color: 0, 0, 0, 1
+                background_color: 0, 0, 0, 0 # Transparent
+                size_hint_x: None
+                width: 40
+                on_release: app.root.current = 'accueil' # Exemple de retour
+            
+            Label:
+                text: "Laisser un avis"
+                font_size: '20sp'
+                bold: True
+                color: 0, 0, 0, 1
+            
+            # Espace pour équilibrer, on peut y mettre l'icone notif/profil
+            Image:
+                source: '../../images/profil_logo.png' # Chemin vers votre logo
+                size_hint_x: None
+                width: 40
+
+        # --- CARTE RECAPITULATIVE DE LA PRESTATION ---
+        BoxLayout:
+            size_hint_y: None
+            height: 90
+            padding: 10
+            spacing: 15
+            canvas.before:
+                Color:
+                    rgba: 0.95, 0.95, 0.95, 1 # Gris très clair
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]
+            
+            # Image du service (ex: le seau de ménage)
+            Image:
+                source: root.image_path
+                size_hint_x: None
+                width: 70
+                allow_stretch: True
+                keep_ratio: True
+
+            # Textes de la carte
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: root.service_nom
+                    bold: True
+                    color: 0, 0, 0, 1
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'bottom'
+                    font_size: '16sp'
+                Label:
+                    text: f"Fait par {root.tech_nom} le {root.date_presta}"
+                    color: 0.5, 0.5, 0.5, 1
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'top'
+                    font_size: '12sp'
+
+        # --- ZONE DE SAISIE DE L'AVIS ---
+        Label:
+            text: "Laissez votre avis :"
+            color: 0, 0, 0, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            size_hint_y: None
+            height: 30
+            bold: True
+
+        TextInput:
+            id: input_message
+            multiline: True
+            hint_text: "..."
+            background_color: 0.95, 0.95, 0.95, 1 # Fond gris comme sur la maquette
+            background_normal: '' # Enlève le style par défaut de Kivy
+            padding: 15
+
+        # Zone pour afficher un message de succès ou d'erreur
+        Label:
+            id: message_retour
+            text: ""
+            size_hint_y: None
+            height: 30
+            bold: True
+
+        # --- BOUTON ENVOYER ---
+        Button:
+            text: "Envoyer"
+            size_hint_y: None
+            height: 55
+            background_color: 0.95, 0.45, 0.15, 1 # Orange
+            background_normal: '' # Nécessaire pour appliquer la couleur unie
+            color: 1, 1, 1, 1
+            bold: True
+            font_size: '18sp'
+            on_release: root.soumettre_avis()
+            # Pour arrondir le bouton
+            canvas.before:
+                Color:
+                    rgba: 0.95, 0.45, 0.15, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10]
