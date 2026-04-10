@@ -1,3 +1,4 @@
+
 import mysql.connector
 from datetime import datetime, timedelta
 
@@ -8,6 +9,7 @@ def get_connection():
         password="",
         database="conciergerie_desruelle"
     )
+
 
 def get_categories():
     conn = get_connection()

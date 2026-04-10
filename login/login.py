@@ -23,7 +23,27 @@ from utilisateur.profil import profil
 from utilisateur.profil.modification import modifier_profil 
 import Database
 
-Window.size = (400, 800)
+
+
+#modification pour l'application 
+#Window.size = (400, 800)
+
+############################################################################
+############################# POUR L'Application ###########################
+############################################################################
+
+from kivy.config import Config
+Config.set('graphics', 'width', '393')
+Config.set('graphics', 'height', '852')
+Config.set('graphics', 'resizable', '0')
+
+
+############################################################################
+############################################################################
+############################################################################
+
+
+
 
 class ServiceCard(MDCard):
     image_source = StringProperty("")
