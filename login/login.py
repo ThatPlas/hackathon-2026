@@ -11,6 +11,7 @@ from kivy.metrics import dp
 from kivymd.uix.card import MDCard
 from kivy.animation import Animation
 from datetime import datetime
+from kivymd.uix.screen import MDScreen
 import sys
 import os
 
@@ -70,43 +71,21 @@ class ConciergerieApp(MDApp):
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
 
-# METS ÇA À LA PLACE :
+        # --- AJOUT DE L'ÉCRAN ADMIN (CORRIGÉ) ---
         try:
-            from kivymd.uix.screen import MDScreen
             chemin_admin = os.path.join(ROOT_DIR, 'admin', 'admin.kv')
-            
-            # 1. On charge l'interface de tes collègues
+            # On charge le contenu du fichier KV
             contenu_admin = Builder.load_file(chemin_admin)
             
-            # 2. On crée une "boîte écran" officielle avec le bon nom
+            # On crée un véritable Screen pour accueillir ce contenu
             self.ecran_admin = MDScreen(name="espace_admin")
             self.ecran_admin.add_widget(contenu_admin)
             
-            # 3. On ajoute la boîte à l'application
+            # On ajoute le Screen au manager principal
             sm.add_widget(self.ecran_admin)
         except Exception as e:
-            print(f"Erreur chargement admin : {e}")
-
-        # === INTEGRATION TECHNICIEN ===
-        # === INTEGRATION TECHNICIEN ===
-        try:
-            from kivymd.uix.screen import MDScreen # On importe l'écran
-            chemin_tech = os.path.join(ROOT_DIR, 'tech', 'interface_design.kv')
-            
-            # self.ecran_tech est la "boîte" de ton collègue
-            self.ecran_tech = Builder.load_file(chemin_tech)
-            
-            # On fabrique un vrai écran "conteneur" pour faire plaisir à Kivy
-            ecran_conteneur = MDScreen(name="espace_technicien")
-            ecran_conteneur.add_widget(self.ecran_tech)
-            
-            # On ajoute le conteneur, et cette fois ça passe !
-            sm.add_widget(ecran_conteneur)
-            print("SUCCÈS : Écran technicien chargé et ajouté !")
-        except Exception as e:
-            print(f"ERREUR au chargement du technicien : {e}")
-        
-        # Injecter l'écran de notification
+            print(f"Erreur chargement Admin : {e}")
+        # 3. Injecter l'écran de notification dans le ScreenManager de la Recherche
         try:
             recherche_sm = self.ecran_client.ids.contenu_recherche.ids.search_screen_manager
             recherche_sm.add_widget(NotifScreen(name='page_notif'))
