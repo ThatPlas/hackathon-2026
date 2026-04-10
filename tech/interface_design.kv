@@ -7,30 +7,6 @@ BoxLayout:
     ScreenManager:
         id: screen_manager
 
-        # --- LOGIN ---
-        Screen:
-            name: "login_screen"
-            MDBoxLayout:
-                orientation: "vertical"
-                padding: dp(20)
-                spacing: dp(20)
-                MDTextField:
-                    id: login_email
-                    hint_text: "Email"
-                MDTextField:
-                    id: login_password
-                    hint_text: "Mot de passe"
-                    password: True
-                MDRaisedButton:
-                    text: "Se connecter"
-                    pos_hint: {"center_x": 0.5}
-                    on_release: app.tenter_connexion(login_email.text, login_password.text)
-                MDLabel:
-                    id: login_msg
-                    text: ""
-                    theme_text_color: "Error"
-                    halign: "center"
-
         # --- MAIN ---
         Screen:
             name: "main_screen"
@@ -102,16 +78,107 @@ BoxLayout:
                                     adaptive_height: True
                                     spacing: dp(6)
 
+                    # --- L'ONGLET CALENDRIER (MODIFIÉ ICI) ---
+                    # --- SECTION CALENDRIER MISE À JOUR ---
                     MDBottomNavigationItem:
                         name: 'calendar'
                         icon: 'calendar-range'
-                        MDScreen:
-                            MDTextField:
-                                id: field
-                                hint_text: "Choisir dates"
-                                pos_hint: {'center_x': .5, 'center_y': .8}
-                                size_hint_x: .6
-                                on_focus: if self.focus: app.show_date_picker()
+                        on_tab_press: app.on_absence_tab_press()
+                        
+                        ScreenManager:
+                            id: absence_manager
+                            
+                            # Vue du Calendrier (Formulaire)
+                            Screen:
+                                name: "formulaire_absence"
+                                MDBoxLayout:
+                                    orientation: 'vertical'
+                                    MDTopAppBar:
+                                        title: "Nouvelle Absence"
+                                        elevation: 0
+                                        md_bg_color: "#691C32" # Garde ta couleur
+                                        right_action_items: [["history", lambda x: app.switch_absence_screen("liste_absence")]]
+                                    
+                                    MDScrollView:
+                                        MDBoxLayout:
+                                            orientation: 'vertical'
+                                            padding: dp(15)
+                                            spacing: dp(15)
+                                            size_hint_y: None
+                                            height: self.minimum_height
+                                            
+                                            MDLabel:
+                                                id: info_selection
+                                                text: "Sélectionnez une période"
+                                                theme_text_color: "Secondary"
+                                                font_style: "Caption"
+                                                adaptive_height: True
+                                            
+                                            MDCard:
+                                                size_hint: 1, None
+                                                # On lie la hauteur du Card à la hauteur de la grille + les contrôles du haut
+                                                height: calendar_grid.height + dp(60) 
+                                                radius: [dp(15),]
+                                                padding: dp(10)
+                                                orientation: 'vertical'
+                                                elevation: 1
+                                                
+                                                MDBoxLayout:
+                                                    adaptive_height: True
+                                                    MDIconButton:
+                                                        icon: "chevron-left"
+                                                        on_release: app.changer_mois(-1)
+                                                    Widget:
+                                                    MDFlatButton:
+                                                        id: label_mois_annee
+                                                        text: ""
+                                                    Widget:
+                                                    MDIconButton:
+                                                        icon: "chevron-right"
+                                                        on_release: app.changer_mois(1)
+                                                
+                                                MDGridLayout:
+                                                    id: calendar_grid
+                                                    cols: 7
+                                                    adaptive_height: True # Important : recalcul automatique
+                                                    row_default_height: (self.width / 7) # Force la hauteur des lignes
+                                                    row_force_default: True
+                                                    spacing: dp(2)
+                                            
+                                            MDTextField:
+                                                id: motif_input
+                                                hint_text: "Motif de l'absence..."
+                                                mode: "fill"
+                                                multiline: True
+                                                size_hint_y: None
+                                                height: dp(80)
+                                            
+                                            MDFillRoundFlatButton:
+                                                id: btn_envoyer_absence
+                                                text: "Envoyer la demande"
+                                                size_hint_x: 1
+                                                md_bg_color: "#691C32"
+                                                disabled: True
+                                                on_release: app.envoyer_formulaire_absence()
+
+                            # Vue de l'Historique
+                            Screen:
+                                name: "liste_absence"
+                                MDBoxLayout:
+                                    orientation: 'vertical'
+                                    MDTopAppBar:
+                                        title: "Mes Demandes"
+                                        elevation: 0
+                                        md_bg_color: "#691C32"
+                                        left_action_items: [["arrow-left", lambda x: app.switch_absence_screen("formulaire_absence", "right")]]
+                                    MDScrollView:
+                                        MDBoxLayout:
+                                            id: container_liste_absences
+                                            orientation: 'vertical'
+                                            padding: dp(15)
+                                            spacing: dp(10)
+                                            size_hint_y: None
+                                            height: self.minimum_height
 
                     MDBottomNavigationItem:
                         name: 'profil'
