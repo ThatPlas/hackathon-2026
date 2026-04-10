@@ -7,8 +7,13 @@
         anchor_title: "center"
         elevation: 0
         md_bg_color: "#691C32"
-        right_action_items: [["logout", lambda x: app.deconnexion()]]
-
+        # Ordre : Logout (à droite), Bell (à gauche du logout)
+        right_action_items: 
+            [
+            ["logout", lambda x: app.deconnexion()],
+            ["bell", lambda x: app.ouvrir_notif()]
+            ]
+            
     MDScrollView:
         MDBoxLayout:
             orientation: 'vertical'
