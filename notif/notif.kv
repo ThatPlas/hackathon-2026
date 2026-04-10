@@ -1,0 +1,40 @@
+<NotifScreen>:
+    name: 'page_notif'
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: [dp(20), dp(10), dp(20), dp(20)]
+        spacing: dp(15)
+        md_bg_color: 1, 1, 1, 1  # Fond blanc pour rester cohérent
+        
+        # --- HEADER ---
+        MDBoxLayout:
+            adaptive_height: True
+            spacing: dp(55) 
+            MDIconButton:
+                icon: "arrow-left"
+                on_release: app.retour_recherche() # Utilise la fonction de ton login.py
+            
+            Image:
+                source: '../logo.png' # Chemin relatif vers ton logo
+                size_hint: None, None
+                size: dp(120), dp(40)
+                pos_hint: {'center_y': 0.5}
+
+            Widget: 
+
+        # --- TITRE DE LA PAGE ---
+        MDLabel:
+            text: "Mes Notifications"
+            font_style: "H5"
+            bold: True
+            adaptive_height: True
+            theme_text_color: "Custom"
+            text_color: "#691C32"
+            halign: "left"
+
+        # --- LISTE DES MESSAGES ---
+        MDScrollView:
+            do_scroll_x: False
+            MDList:
+                id: notif_list
+                # Les notifications seront injectées ici par charger_notifications()

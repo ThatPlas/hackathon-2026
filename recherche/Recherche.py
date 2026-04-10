@@ -16,49 +16,11 @@ from kivy.uix.widget import Widget
 import Database as bdd
 from datetime import datetime
 
-Window.size = (360, 740)
+# --- IMPORT DE TON COMPOSANT NOTIF ---
+# On suppose que ton fichier s'appelle notif.py et contient la classe NotifScreen
+from notif import NotifScreen 
 
-interface_design = """
-<ServiceCard>:
-    orientation: 'vertical'
-    size_hint_y: None
-    height: header.height + sub_services_list.height
-    elevation: 2
-    radius: [dp(15),]
-    md_bg_color: 1, 1, 1, 1
-    on_release: root.toggle_expansion()
-    
-    MDBoxLayout:
-        id: header
-        orientation: 'vertical'
-        size_hint_y: None
-        height: dp(200)
-        FitImage:
-            source: root.image_source
-            size_hint_y: None
-            height: dp(140)
-            radius: [dp(15), dp(15), 0, 0]
-        MDBoxLayout:
-            orientation: 'vertical'
-            padding: [dp(15), dp(10), dp(15), 0]
-            MDLabel:
-                text: root.title_text
-                font_style: 'Subtitle1'
-                bold: True
-                adaptive_height: True
-            MDLabel:
-                text: "Cliquez pour voir les services"
-                font_style: 'Caption'
-                theme_text_color: 'Secondary'
-                adaptive_height: True
-    
-    MDList:
-        id: sub_services_list
-        size_hint_y: None
-        height: 0
-        opacity: 0
-        adaptive_height: True
-"""
+Window.size = (360, 740)
 
 class ServiceCard(MDCard):
     image_source = StringProperty("")
@@ -79,8 +41,23 @@ class ConciergerieApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Red"
         self.theme_cls.theme_style = "Light"
+        
+        # 1. Charger le fichier KV des notifications s'il est séparé
+        try:
+            Builder.load_file('notif.kv')
+        except Exception as e:
+            print(f"Note: notif.kv non chargé ou déjà intégré : {e}")
+
+        # 2. Charger l'interface principale
+        root_widget = Builder.load_file('Recherche.kv')
+        
+        # 3. Ajouter l'écran de notification au ScreenManager dynamiquement
+        # On récupère le ScreenManager via son ID défini dans Recherche.kv
+        sm = root_widget.ids.search_screen_manager
+        sm.add_widget(NotifScreen(name='page_notif'))
+        
         self.all_services = bdd.get_categories()
-        return Builder.load_file('Recherche.kv')
+        return root_widget
 
     def on_start(self):
         self.filter_services("") 
@@ -98,7 +75,11 @@ class ConciergerieApp(MDApp):
                 card = ServiceCard(image_source=f"images/{cat_name_lower}.jpg", title_text=cat_name_display)
                 list_to_show = all_types if (query == "" or query in cat_name_lower) else matching_types
                 for p in list_to_show:
-                    item = OneLineListItem(text=f"{p['nom']} - {p['prix']}€", divider="Full", on_release=lambda x, data=p: self.ouvrir_details(data))
+                    item = OneLineListItem(
+                        text=f"{p['nom']} - {p['prix']}€", 
+                        divider="Full", 
+                        on_release=lambda x, data=p: self.ouvrir_details(data)
+                    )
                     card.ids.sub_services_list.add_widget(item)
                 container.add_widget(card)
 
@@ -117,6 +98,11 @@ class ConciergerieApp(MDApp):
         self.root.ids.search_screen_manager.transition.direction = "left"
         self.root.ids.search_screen_manager.current = 'page_panier'
 
+    # --- NOUVELLE MÉTHODE POUR LES NOTIFICATIONS ---
+    def ouvrir_notif(self):
+        self.root.ids.search_screen_manager.transition.direction = "left"
+        self.root.ids.search_screen_manager.current = 'page_notif'
+
     def charger_panier(self):
         panier_list = self.root.ids.panier_list
         panier_list.clear_widgets()
@@ -128,7 +114,11 @@ class ConciergerieApp(MDApp):
             date_formatee = dt.strftime("%d/%m/%Y à %Hh%M") if isinstance(dt, datetime) else str(dt)
             row = ThreeLineAvatarIconListItem(text=item['nom'], secondary_text=f"Prix : {item['prix']}€", tertiary_text=f"{date_formatee}")
             row.add_widget(IconLeftWidget(icon="tag-outline"))
-            delete_btn = IconRightWidget(icon="trash-can-outline", theme_text_color="Error", on_release=lambda x, id_p=item['id_presta']: self.supprimer_du_panier(id_p))
+            delete_btn = IconRightWidget(
+                icon="trash-can-outline", 
+                theme_text_color="Error", 
+                on_release=lambda x, id_p=item['id_presta']: self.supprimer_du_panier(id_p)
+            )
             row.add_widget(delete_btn)
             panier_list.add_widget(row)
         self.root.ids.total_label.text = f"{total:.2f} €"
