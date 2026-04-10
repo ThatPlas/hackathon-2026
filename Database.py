@@ -1,13 +1,11 @@
 
 import mysql.connector
 from datetime import datetime, timedelta
-
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="",
-        password="",
+        password="",   # <--- L'ERREUR EST LÀ : La ligne est en double !
         database="conciergerie_desruelle"
     )
 
