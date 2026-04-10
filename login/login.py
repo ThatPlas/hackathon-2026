@@ -3,7 +3,8 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
-from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget
+from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget, TwoLineAvatarIconListItem, ImageLeftWidget
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.label import MDLabel
 from kivy.metrics import dp
@@ -27,7 +28,6 @@ import Database
 Window.size = (400, 800)
 
 class ServiceCard(MDCard):
-    """Classe pour les cartes d'aperçu des services avec animation"""
     image_source = StringProperty("")
     title_text = StringProperty("")
     expanded = BooleanProperty(False)
@@ -42,6 +42,7 @@ class ServiceCard(MDCard):
 class ConciergerieApp(MDApp):
     utilisateur_courant = None 
     current_service_id = NumericProperty(0)
+    presta_actuelle_id = NumericProperty(None) # Pour l'Admin
 
     def build(self):
         self.theme_cls.primary_palette = "Red"
@@ -70,6 +71,11 @@ class ConciergerieApp(MDApp):
         chemin_contact = os.path.join(ROOT_DIR, 'contact.kv')
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
+
+        # Ajout de l'écran Admin
+        chemin_admin = os.path.join(ROOT_DIR, 'admin.kv')
+        self.ecran_admin = Builder.load_file(chemin_admin)
+        sm.add_widget(self.ecran_admin)
         
         # 3. Injecter l'écran de notification dans le ScreenManager de la Recherche
         try:
@@ -293,6 +299,12 @@ class ConciergerieApp(MDApp):
                 widget_p = self.ecran_client.ids.contenu_profil
                 profil.charger_donnees_profil(widget_p, utilisateur)
                 self.filter_services("") 
+            
+            elif role == "admin":
+                self.utilisateur_courant = utilisateur
+                self.root.current = "espace_admin"
+                self.charger_apercu_rapide() # Charge directement le dashboard Admin !
+            
             else:
                 self.root.current = f"espace_{role}"
         except Exception as e:
