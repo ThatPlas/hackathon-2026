@@ -32,7 +32,7 @@ class NotifScreen(MDScreen):
 
         try:
             # Appel à la base de données
-            notifications = bdd.get_notifications(user_id)
+            notifications = bdd.get_notifs(user_id)
 
             if not notifications:
                 container.add_widget(
