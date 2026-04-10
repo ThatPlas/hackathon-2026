@@ -1,4 +1,4 @@
-from App import MyApp
+from tech import Tech
 
-MyTechApp = MyApp()
+MyTechApp = Tech()
 MyTechApp.run()

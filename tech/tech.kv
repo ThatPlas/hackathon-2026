@@ -6,8 +6,6 @@ BoxLayout:
 
     ScreenManager:
         id: screen_manager
-
-        # --- MAIN ---
         Screen:
             name: "main_screen"
             MDScreen:
@@ -78,8 +76,6 @@ BoxLayout:
                                     adaptive_height: True
                                     spacing: dp(6)
 
-                    # --- L'ONGLET CALENDRIER (MODIFIÉ ICI) ---
-                    # --- SECTION CALENDRIER MISE À JOUR ---
                     MDBottomNavigationItem:
                         name: 'calendar'
                         icon: 'calendar-range'
@@ -88,7 +84,6 @@ BoxLayout:
                         ScreenManager:
                             id: absence_manager
                             
-                            # Vue du Calendrier (Formulaire)
                             Screen:
                                 name: "formulaire_absence"
                                 MDBoxLayout:
@@ -160,8 +155,6 @@ BoxLayout:
                                                 md_bg_color: "#691C32"
                                                 disabled: True
                                                 on_release: app.envoyer_formulaire_absence()
-
-                            # Vue de l'Historique
                             Screen:
                                 name: "liste_absence"
                                 MDBoxLayout:
@@ -197,8 +190,6 @@ BoxLayout:
                                 text: "Changer le mot de passe"
                                 pos_hint: {"center_x": 0.5}
                                 on_release: app.show_change_password_screen()
-
-        # --- DETAIL : EN COURS ---
         Screen:
             name: "detail_en_cours"
             MDBoxLayout:
@@ -324,7 +315,6 @@ BoxLayout:
                             md_bg_color: "#691C32"
                             on_release: screen_manager.current = "main_screen"
 
-        # --- DETAIL : A VENIR ---
         Screen:
             name: "detail_a_venir"
             MDBoxLayout:
@@ -356,7 +346,6 @@ BoxLayout:
                     pos_hint: {"center_x": 0.5}
                     on_release: screen_manager.current = "main_screen"
 
-        # --- DETAIL : HISTORIQUE ---
         Screen:
             name: "detail_historique"
             MDBoxLayout:
@@ -387,8 +376,6 @@ BoxLayout:
                     text: "Retour"
                     pos_hint: {"center_x": 0.5}
                     on_release: screen_manager.current = "main_screen"
-
-        # --- FEEDBACK ---
         Screen:
             name: "feedback_screen"
             MDBoxLayout:
@@ -398,6 +385,18 @@ BoxLayout:
                 MDLabel:
                     text: "Feedback"
                     halign: "center"
+                
+                MDRaisedButton:
+                    text: "Ajouter une photo/vidéo"
+                    icon: "camera"
+                    on_release: app.import_media()
+
+                MDLabel:
+                    id: label_media_status
+                    text: "Aucun fichier joint"
+                    halign: "center"
+                    theme_text_color: "Hint"
+                    
                 MDTextField:
                     id: feedback_description
                     hint_text: "Description"
@@ -408,8 +407,8 @@ BoxLayout:
                 MDRaisedButton:
                     text: "Annuler"
                     on_release: app.cancel_feedback()
+                
 
-        # --- PASSWORD ---
         Screen:
             name: "change_password_screen"
             MDBoxLayout:
