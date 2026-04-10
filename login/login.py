@@ -10,8 +10,7 @@ from kivymd.uix.label import MDLabel
 from kivy.metrics import dp
 from kivymd.uix.card import MDCard
 from kivy.animation import Animation
-from datetime import datetime, date
-import calendar
+from datetime import datetime
 import sys
 import os
 
@@ -79,22 +78,19 @@ class ConciergerieApp(MDApp):
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
 
-        # --- Écran admin ---
-        # FIX : on garde une référence au ScreenManager interne de l'admin (sm_admin)
-        # pour que toutes les méthodes admin utilisent sm_admin.ids au lieu de self.root.ids
+# METS ÇA À LA PLACE :
         try:
             from kivymd.uix.screen import MDScreen
-            from kivy.factory import Factory
-
             chemin_admin = os.path.join(ROOT_DIR, 'admin', 'admin.kv')
+            
+            # 1. On charge l'interface de tes collègues
             contenu_admin = Builder.load_file(chemin_admin)
-
-            # sm_admin = le ScreenManager interne de l'admin (contient main_admin, detail_presta, etc.)
-            self.sm_admin = contenu_admin
-
-            # On enveloppe dans un MDScreen pour le ScreenManager principal
+            
+            # 2. On crée une "boîte écran" officielle avec le bon nom
             self.ecran_admin = MDScreen(name="espace_admin")
             self.ecran_admin.add_widget(contenu_admin)
+            
+            # 3. On ajoute la boîte à l'application
             sm.add_widget(self.ecran_admin)
 
             # FIX : injection du ProfilContent dans l'onglet profil admin (manquait depuis login.py)
@@ -104,19 +100,26 @@ class ConciergerieApp(MDApp):
         except Exception as e:
             print(f"Erreur chargement admin : {e}")
 
-        # --- Écran technicien ---
+        # === INTEGRATION TECHNICIEN ===
+        # === INTEGRATION TECHNICIEN ===
         try:
-            from kivymd.uix.screen import MDScreen
+            from kivymd.uix.screen import MDScreen # On importe l'écran
             chemin_tech = os.path.join(ROOT_DIR, 'tech', 'interface_design.kv')
+            
+            # self.ecran_tech est la "boîte" de ton collègue
             self.ecran_tech = Builder.load_file(chemin_tech)
+            
+            # On fabrique un vrai écran "conteneur" pour faire plaisir à Kivy
             ecran_conteneur = MDScreen(name="espace_technicien")
             ecran_conteneur.add_widget(self.ecran_tech)
+            
+            # On ajoute le conteneur, et cette fois ça passe !
             sm.add_widget(ecran_conteneur)
             print("SUCCÈS : Écran technicien chargé et ajouté !")
         except Exception as e:
             print(f"ERREUR au chargement du technicien : {e}")
-
-        # --- Injection de l'écran de notification dans le client ---
+        
+        # Injecter l'écran de notification
         try:
             recherche_sm = self.ecran_client.ids.contenu_recherche.ids.search_screen_manager
             recherche_sm.add_widget(NotifScreen(name='page_notif'))
