@@ -115,12 +115,19 @@ class ConciergerieApp(MDApp):
     # ==========================================
     # LOGIQUE RECHERCHE, PANIER ET NOTIF
     # ==========================================
+    # Dans login.py (ou recherche.py selon ton fichier de lancement)
+
     def ouvrir_notif(self):
-        """Ouvre l'écran des notifications"""
+        """Ouvre l'écran des notifications depuis n'importe quel onglet"""
         try:
+            # 1. On bascule vers l'onglet recherche (nommé 'page_recherche' dans ton Accueil.kv)
+            self.ecran_client.ids.nav_bar.switch_tab('page_recherche') 
+            
+            # 2. On accède au manager de recherche pour afficher les notifs
             recherche_ui = self.ecran_client.ids.contenu_recherche.ids
             recherche_ui.search_screen_manager.transition.direction = "left"
             recherche_ui.search_screen_manager.current = 'page_notif'
+            
         except Exception as e:
             print(f"Erreur navigation notif : {e}")
 
