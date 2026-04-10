@@ -6,6 +6,8 @@ from datetime import datetime, date
 # Ajouter le dossier parent au path pour pouvoir importer Database.py
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import Database
+from utilisateur.profil import profil
+from utilisateur.profil.modification import modifier_profil
 
 from kivy.lang import Builder
 from kivymd.app import MDApp
@@ -17,15 +19,74 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.properties import NumericProperty
 
 class AdminApp(MDApp):
-    presta_actuelle_id = NumericProperty(None) # Mémorise la prestation qu'on est en train de consulter
+    presta_actuelle_id = NumericProperty(None)
+    utilisateur_courant = None  # Stocke les infos de l'admin connecté
 
     def build(self):
         self.theme_cls.primary_palette = "Gray"
+
+        # Charger le KV du profil existant
+        profil_kv_path = os.path.join(os.path.dirname(__file__), '..', 'utilisateur', 'profil', 'profil.kv')
+        Builder.load_file(profil_kv_path)
+
+        # Charger le KV de modification du profil
+        modif_kv_path = os.path.join(os.path.dirname(__file__), '..', 'utilisateur', 'profil', 'modification', 'modifier_profil.kv')
+        self.ecran_modif = Builder.load_file(modif_kv_path)
+
+        # Charger l'interface admin
         kv_path = os.path.join(os.path.dirname(__file__), "admin.kv")
-        return Builder.load_file(kv_path)
+        root = Builder.load_file(kv_path)
+
+        # Ajouter l'écran de modification de profil au ScreenManager
+        root.add_widget(self.ecran_modif)
+
+        # Injecter le composant ProfilContent dans l'onglet profil
+        from kivy.factory import Factory
+        self.vue_profil = Factory.ProfilContent()
+        root.ids.profil_container.add_widget(self.vue_profil)
+
+        return root
 
     def on_start(self):
         self.charger_apercu_rapide()
+
+    # --- PROFIL (réutilise utilisateur/profil) ---
+    def charger_profil(self):
+        """Charge les données du profil admin via le composant ProfilContent existant"""
+        if not self.utilisateur_courant:
+            return
+        profil.charger_donnees_profil(self.vue_profil, self.utilisateur_courant)
+
+    def aller_vers_modifier_profil(self):
+        """Navigue vers l'écran de modification du profil existant"""
+        if not self.utilisateur_courant:
+            return
+        modifier_profil.charger_donnees(self.ecran_modif, self.utilisateur_courant)
+        self.root.current = "page_modifier_profil"
+
+    def sauvegarder_profil(self):
+        """Sauvegarde les modifications du profil admin"""
+        if not self.utilisateur_courant:
+            return
+        nom = self.ecran_modif.ids.modif_nom.text
+        prenom = self.ecran_modif.ids.modif_prenom.text
+        email = self.ecran_modif.ids.modif_email.text
+        tel = self.ecran_modif.ids.modif_tel.text
+        adr = self.ecran_modif.ids.modif_adresse.text
+
+        Database.update_user_details(self.utilisateur_courant['id_user'], nom, prenom, email, tel, adr)
+        self.utilisateur_courant = Database.get_users_details(self.utilisateur_courant['id_user'])
+        self.charger_profil()
+        self.root.current = "main_admin"
+
+    def retour_profil(self):
+        """Retour depuis l'écran de modification vers l'admin"""
+        self.root.current = "main_admin"
+
+    def deconnexion(self):
+        """Déconnexion de l'admin"""
+        self.utilisateur_courant = None
+        self.stop()
 
     def creer_list_item(self, titre, sous_titre, action_menu):
         item = TwoLineAvatarIconListItem(text=titre, secondary_text=sous_titre, bg_color=(1, 1, 1, 1))
@@ -58,7 +119,7 @@ class AdminApp(MDApp):
 
     def charger_tous_les_techniciens(self):
         self.root.ids.list_all_techs.clear_widgets()
-        for tech in Database.get_all_techs():
+        for tech in Database.get_all_technicians():
             item = self.creer_list_item(f"{tech['prenom']} {tech['nom']}", "Technicien", 
                                         lambda inst, tid=tech['id_user']: self.ouvrir_menu_tech(inst, tid))
             self.root.ids.list_all_techs.add_widget(item)
@@ -312,7 +373,7 @@ class AdminApp(MDApp):
     def ouvrir_assignation(self):
         """Ouvre la liste des techniciens pour assignation"""
         self.root.ids.list_techs_dispo.clear_widgets()
-        techs = Database.get_all_techs()
+        techs = Database.get_all_technicians()
         
         for tech in techs:
             item = TwoLineAvatarIconListItem(text=f"{tech['prenom']} {tech['nom']}", secondary_text="Cliquer pour assigner")

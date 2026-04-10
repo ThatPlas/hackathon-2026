@@ -103,6 +103,17 @@ ScreenManager:
                             MDList:
                                 id: list_annulees
 
+            # 3. Onglet Profil (réutilise le composant ProfilContent existant)
+            MDBottomNavigationItem:
+                name: 'nav_profil'
+                text: 'Profil'
+                icon: 'account-circle'
+                on_tab_press: app.charger_profil()
+
+                MDBoxLayout:
+                    id: profil_container
+                    orientation: 'vertical'
+
     # ---------------------------------------------------
     # DÉTAILS PRESTATION
     # ---------------------------------------------------
