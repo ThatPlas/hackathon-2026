@@ -11,6 +11,7 @@ from kivy.metrics import dp
 from kivymd.uix.card import MDCard
 from kivy.animation import Animation
 from datetime import datetime
+from kivymd.uix.screen import MDScreen
 import sys
 import os
 
@@ -72,11 +73,20 @@ class ConciergerieApp(MDApp):
         self.ecran_contact = Builder.load_file(chemin_contact)
         sm.add_widget(self.ecran_contact)
 
-        # Ajout de l'écran Admin
-        chemin_admin = os.path.join(ROOT_DIR, 'admin.kv')
-        self.ecran_admin = Builder.load_file(chemin_admin)
-        sm.add_widget(self.ecran_admin)
-        
+        # --- AJOUT DE L'ÉCRAN ADMIN (CORRIGÉ) ---
+        try:
+            chemin_admin = os.path.join(ROOT_DIR, 'admin', 'admin.kv')
+            # On charge le contenu du fichier KV
+            contenu_admin = Builder.load_file(chemin_admin)
+            
+            # On crée un véritable Screen pour accueillir ce contenu
+            self.ecran_admin = MDScreen(name="espace_admin")
+            self.ecran_admin.add_widget(contenu_admin)
+            
+            # On ajoute le Screen au manager principal
+            sm.add_widget(self.ecran_admin)
+        except Exception as e:
+            print(f"Erreur chargement Admin : {e}")
         # 3. Injecter l'écran de notification dans le ScreenManager de la Recherche
         try:
             recherche_sm = self.ecran_client.ids.contenu_recherche.ids.search_screen_manager
