@@ -1,22 +1,22 @@
 ScreenManager:
     id: screen_manager
-    
+
     # ---------------------------------------------------
     # APERÇU RAPIDE & MENU DU BAS
     # ---------------------------------------------------
     MDScreen:
         name: "main_admin"
-        
+
         MDBottomNavigation:
-            text_color_active: 0.5, 0, 0.2, 1 
-            
+            text_color_active: 0.5, 0, 0.2, 1
+
             # 1. Onglet Techniciens (Toute la liste)
             MDBottomNavigationItem:
                 name: 'nav_techs'
                 text: 'Techniciens'
                 icon: 'account-group'
                 on_tab_press: app.charger_tous_les_techniciens()
-                
+
                 MDBoxLayout:
                     orientation: 'vertical'
                     MDRelativeLayout:
@@ -27,11 +27,10 @@ ScreenManager:
                             font_style: "H4"
                             bold: True
                             x: "20dp"
-                        # BOUTON POUR AJOUTER UN TECHNICIEN
                         MDIconButton:
                             icon: "plus"
                             pos_hint: {"center_y": .5, "right": 0.95}
-                            on_release: app.root.current = "ajouter_tech"
+                            on_release: app.naviguer_admin("ajouter_tech")
 
                     MDScrollView:
                         MDList:
@@ -44,7 +43,7 @@ ScreenManager:
                 text: 'Aperçu rapide'
                 icon: 'folder-outline'
                 on_tab_press: app.charger_apercu_rapide()
-                
+
                 MDBoxLayout:
                     orientation: 'vertical'
                     MDRelativeLayout:
@@ -62,7 +61,7 @@ ScreenManager:
                             adaptive_height: True
                             padding: "20dp"
                             spacing: "20dp"
-                            
+
                             MDLabel:
                                 text: "5 derniers techniciens"
                                 font_style: "H6"
@@ -70,7 +69,7 @@ ScreenManager:
                                 adaptive_height: True
                             MDList:
                                 id: list_last_techs
-                                
+
                             MDLabel:
                                 text: "Prestations en attente"
                                 font_style: "H6"
@@ -78,7 +77,7 @@ ScreenManager:
                                 adaptive_height: True
                             MDList:
                                 id: list_attente
-                                
+
                             MDLabel:
                                 text: "Prestations confirmées"
                                 font_style: "H6"
@@ -86,7 +85,7 @@ ScreenManager:
                                 adaptive_height: True
                             MDList:
                                 id: list_confirmees
-                                
+
                             MDLabel:
                                 text: "Prestations terminées"
                                 font_style: "H6"
@@ -103,12 +102,12 @@ ScreenManager:
                             MDList:
                                 id: list_annulees
 
-            # 3. Onglet Profil (réutilise le composant ProfilContent existant)
+            # 3. Onglet Profil
             MDBottomNavigationItem:
                 name: 'nav_profil'
                 text: 'Profil'
                 icon: 'account-circle'
-                on_tab_press: app.charger_profil()
+                on_tab_press: app.charger_profil_admin()
 
                 MDBoxLayout:
                     id: profil_container
@@ -122,7 +121,6 @@ ScreenManager:
         MDBoxLayout:
             orientation: 'vertical'
 
-            # Barre du haut
             MDBoxLayout:
                 size_hint_y: None
                 height: "56dp"
@@ -130,7 +128,7 @@ ScreenManager:
                 MDIconButton:
                     icon: "arrow-left"
                     pos_hint: {"center_y": .5}
-                    on_release: app.root.current = "main_admin"
+                    on_release: app.naviguer_admin("main_admin")
                 MDLabel:
                     id: dp_header
                     text: "Détails prestation"
@@ -145,7 +143,6 @@ ScreenManager:
                     padding: "20dp"
                     spacing: "6dp"
 
-                    # Titre + Status
                     MDLabel:
                         id: dp_titre
                         text: "Prestation n°..."
@@ -166,11 +163,9 @@ ScreenManager:
                             markup: True
                             adaptive_height: True
 
-                    # Séparateur
                     MDSeparator:
                         height: "1dp"
 
-                    # Client
                     MDLabel:
                         text: "Client"
                         font_size: "12sp"
@@ -182,7 +177,6 @@ ScreenManager:
                         font_style: "H6"
                         adaptive_height: True
 
-                    # Technicien
                     MDLabel:
                         text: "Technicien"
                         font_size: "12sp"
@@ -195,7 +189,6 @@ ScreenManager:
                         adaptive_height: True
                         on_touch_down: if self.collide_point(*args[1].pos): app.ouvrir_assignation()
 
-                    # Type de prestation
                     MDLabel:
                         text: "Prestation"
                         font_size: "12sp"
@@ -206,7 +199,6 @@ ScreenManager:
                         text: "..."
                         adaptive_height: True
 
-                    # Dates
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: "20dp"
@@ -235,7 +227,6 @@ ScreenManager:
                                 text: "..."
                                 adaptive_height: True
 
-                    # Adresse
                     MDLabel:
                         text: "Adresse"
                         font_size: "12sp"
@@ -246,7 +237,6 @@ ScreenManager:
                         text: "..."
                         adaptive_height: True
 
-                    # Complément d'adresse
                     MDLabel:
                         text: "Complément d'adresse"
                         font_size: "12sp"
@@ -257,7 +247,6 @@ ScreenManager:
                         text: "..."
                         adaptive_height: True
 
-                    # Infos supplémentaires
                     MDLabel:
                         text: "Infos supplémentaires"
                         font_size: "12sp"
@@ -268,7 +257,6 @@ ScreenManager:
                         text: "..."
                         adaptive_height: True
 
-                    # Total
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: "10dp"
@@ -288,7 +276,6 @@ ScreenManager:
                         bold: True
                         adaptive_height: True
 
-            # Boutons en bas
             MDBoxLayout:
                 size_hint_y: None
                 height: "60dp"
@@ -319,7 +306,6 @@ ScreenManager:
         MDBoxLayout:
             orientation: 'vertical'
 
-            # Barre du haut
             MDBoxLayout:
                 size_hint_y: None
                 height: "56dp"
@@ -327,7 +313,7 @@ ScreenManager:
                 MDIconButton:
                     icon: "arrow-left"
                     pos_hint: {"center_y": .5}
-                    on_release: app.root.current = "main_admin"
+                    on_release: app.naviguer_admin("main_admin")
                 MDLabel:
                     text: "Détails technicien"
                     font_style: "H6"
@@ -341,7 +327,6 @@ ScreenManager:
                     padding: "20dp"
                     spacing: "15dp"
 
-                    # Info technicien
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: "20dp"
@@ -369,7 +354,6 @@ ScreenManager:
                     MDSeparator:
                         height: "1dp"
 
-                    # Calendrier de disponibilités
                     MDLabel:
                         text: "Calendrier des disponibilités"
                         font_style: "H6"
@@ -384,7 +368,7 @@ ScreenManager:
                             icon: "chevron-left"
                             on_release: app.calendrier_mois_precedent()
                         MDLabel:
-                            id: dt_calendar_titre
+                            id: cal_label
                             text: "Mois Année"
                             halign: "center"
                             font_style: "H6"
@@ -393,14 +377,12 @@ ScreenManager:
                             icon: "chevron-right"
                             on_release: app.calendrier_mois_suivant()
 
-                    # Grille du calendrier (remplie dynamiquement)
                     MDGridLayout:
-                        id: dt_calendar_grid
+                        id: cal_grid
                         cols: 7
                         adaptive_height: True
                         spacing: "2dp"
 
-                    # Légende
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: "20dp"
@@ -445,7 +427,6 @@ ScreenManager:
                     MDSeparator:
                         height: "1dp"
 
-                    # Dernières prestations
                     MDLabel:
                         text: "Dernières prestations"
                         font_style: "H6"
@@ -464,14 +445,14 @@ ScreenManager:
             orientation: 'vertical'
             padding: "20dp"
             spacing: "15dp"
-            
+
             MDRelativeLayout:
                 size_hint_y: None
                 height: "60dp"
                 MDIconButton:
                     icon: "arrow-left"
                     pos_hint: {"center_y": .5}
-                    on_release: app.root.current = "main_admin"
+                    on_release: app.naviguer_admin("main_admin")
                 MDLabel:
                     text: "Ajouter un technicien"
                     font_style: "H5"
@@ -495,9 +476,9 @@ ScreenManager:
                 id: input_mdp
                 hint_text: "Mot de passe provisoire"
                 password: True
-                
+
             Widget:
-            
+
             MDRaisedButton:
                 text: "Enregistrer"
                 pos_hint: {"center_x": .5}
@@ -511,21 +492,21 @@ ScreenManager:
         name: "assigner_tech"
         MDBoxLayout:
             orientation: 'vertical'
-            
+
             MDRelativeLayout:
                 size_hint_y: None
                 height: "60dp"
                 MDIconButton:
                     icon: "arrow-left"
                     pos_hint: {"center_y": .5}
-                    on_release: app.root.current = "detail_presta"
+                    on_release: app.naviguer_admin("detail_presta")
                 MDLabel:
                     text: "Sélectionner un technicien"
                     font_style: "H5"
                     bold: True
                     pos_hint: {"center_y": .5}
                     x: "50dp"
-                    
+
             MDScrollView:
                 MDList:
                     id: list_techs_dispo
