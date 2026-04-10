@@ -107,7 +107,7 @@ def create_prestation(id_user, id_type_presta, debut, fin, adresse):
     cursor = conn.cursor()
     # On initialise le statut à 'dans_panier'
     cursor.execute("INSERT INTO prestation (id_user, debut_contrat, fin_contrat, adresse, status) VALUES (%s, %s, %s, %s, %s)",
-                   (id_user, debut, fin, adresse, "dans_panier"))
+                   (id_user, debut, fin, adresse, "Dans_panier"))
     id_presta = cursor.lastrowid
     cursor.execute("INSERT INTO relation_type_presta (id_presta, id_type_presta) VALUES (%s, %s)",
                    (id_presta, id_type_presta))
@@ -123,7 +123,7 @@ def get_user_panier(user_id):
         FROM prestation p
         JOIN relation_type_presta rtp ON p.id_presta = rtp.id_presta
         JOIN type_presta tp ON rtp.id_type_presta = tp.id_type_presta
-        WHERE p.id_user = %s AND p.status = 'dans_panier'
+        WHERE p.id_user = %s AND p.status = 'Dans_panier'
     """
     cursor.execute(query, (user_id,))
     res = cursor.fetchall()
@@ -134,8 +134,13 @@ def get_user_panier(user_id):
 def valider_panier_db(user_id):
     conn = get_connection()
     cursor = conn.cursor()
-    query = "UPDATE prestation SET status = 'En attente' WHERE id_user = %s AND status = 'dans_panier'"
-    cursor.execute(query, (user_id,))
+
+    # 1. On passe les prestations en "En attente"
+    cursor.execute("UPDATE prestation SET status = 'En attente' WHERE id_user = %s AND status = 'Dans_panier'", (user_id,))
+
+    # 2. On crée la notif pour l'admin (ID 1)
+    cursor.execute("INSERT INTO notif (message, id_user, a_lu) VALUES (%s, %s, %s)", ("Nouvelle Prestation en attente", 1, 'Non'))
+
     conn.commit()
     cursor.close()
     conn.close()
